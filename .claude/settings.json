@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:www.bluepms.com)",
+      "Bash(curl -s -L \"https://www.bluepms.com/\" -A \"Mozilla/5.0 \\(Windows NT 10.0; Win64; x64\\) AppleWebKit/537.36 \\(KHTML, like Gecko\\) Chrome/120.0.0.0 Safari/537.36\" -o /tmp/bluepms.html)",
+      "Read(//tmp/**)",
+      "Bash(curl -sL \"https://bluepms.com/opengraph-image.png\" -A \"Mozilla/5.0\" -o \"bluepms-logo.png\")",
+      "Bash(curl -sL \"https://bluepms.com/favicon.ico\" -A \"Mozilla/5.0\" -o \"favicon.ico\")"
+    ]
+  }
+}
