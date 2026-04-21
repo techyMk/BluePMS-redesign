@@ -1,0 +1,2271 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>BluePMS — The AI Operating System for Hotels</title>
+<meta name="description" content="Run front office, POS, housekeeping, F&B, inventory, CRM and revenue in one 100% cloud, AI-integrated platform. Go live in 48 hours." />
+<link rel="icon" type="image/x-icon" href="favicon.ico" />
+<link rel="apple-touch-icon" href="bluepms-logo.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" />
+<script>
+/* Tweaks defaults */
+const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+  "blueShade": "#0E2A47",
+  "headingFont": "serif",
+  "density": "airy",
+  "dark": false
+}/*EDITMODE-END*/;
+</script>
+<style>
+  :root {
+    --brand-blue: #1B75BB;
+    --brand-blue-2: #1469AE;
+    --ink: #0E2A47;
+    --ink-2: #0A2038;
+    --ink-3: #1B3B63;
+    --ink-4: #3A5A80;
+    --ink-5: #6B83A3;
+    --ink-6: #9DB0C7;
+    --line: #E4EAF2;
+    --line-2: #EEF2F8;
+    --bg: #FBFCFD;
+    --bg-2: #F4F7FB;
+    --bg-3: #EDF2F8;
+    --white: #FFFFFF;
+    --glass: rgba(255,255,255,0.55);
+    --glass-stroke: rgba(255,255,255,0.8);
+    --shadow-sm: 0 1px 2px rgba(14,42,71,0.04), 0 1px 1px rgba(14,42,71,0.03);
+    --shadow-md: 0 10px 24px -8px rgba(14,42,71,0.14), 0 2px 6px rgba(14,42,71,0.06);
+    --shadow-lg: 0 40px 80px -20px rgba(14,42,71,0.30), 0 10px 20px -10px rgba(14,42,71,0.15);
+    --r-sm: 8px; --r-md: 12px; --r-lg: 18px; --r-xl: 28px;
+    --pad: 96px;
+    --font-display: 'Fraunces', 'Times New Roman', serif;
+    --font-body: 'Inter', -apple-system, 'Segoe UI', sans-serif;
+    --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+  }
+  html[data-density="compact"] { --pad: 64px; }
+  html[data-heading="sans"] { --font-display: 'Inter', sans-serif; }
+  html[data-dark="true"] {
+    --bg: #070C14; --bg-2: #0B1422; --bg-3: #0F1B2E;
+    --ink: #E8EEF7; --ink-2: #F4F7FB; --ink-3: #C8D3E3; --ink-4: #95A7C0; --ink-5: #6B83A3; --ink-6: #3F587A;
+    --line: #1B2A42; --line-2: #14213A; --white: #0E1A2D;
+    --glass: rgba(20,33,58,0.55);
+    --glass-stroke: rgba(255,255,255,0.08);
+  }
+
+  *,*::before,*::after { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: var(--font-body);
+    font-size: 16px;
+    line-height: 1.55;
+    color: var(--ink);
+    background: var(--bg);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    overflow-x: hidden;
+  }
+  html { scroll-behavior: smooth; }
+  a { color: inherit; text-decoration: none; }
+  button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+  img { max-width: 100%; display: block; }
+
+  .container { max-width: 1280px; margin: 0 auto; padding: 0 32px; }
+  .h-display { font-family: var(--font-display); font-weight: 400; letter-spacing: -0.03em; line-height: 1.02; font-optical-sizing: auto; }
+  .h-display em { font-style: italic; font-weight: 400; color: var(--ink-3); }
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--ink-4);
+    font-weight: 500;
+  }
+  .mono { font-family: var(--font-mono); }
+
+  /* ─── Scroll progress + grain ─── */
+  .scroll-progress {
+    position: fixed; top: 0; left: 0; right: 0; height: 2px; z-index: 200;
+    background: linear-gradient(90deg, var(--ink-3), var(--ink), #4A77B0); transform-origin: 0 50%;
+    transform: scaleX(0); transition: transform .1s linear;
+    pointer-events: none;
+  }
+  body::before {
+    content: ''; position: fixed; inset: 0; z-index: 1; pointer-events: none;
+    opacity: .04; mix-blend-mode: multiply;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size: 180px 180px;
+  }
+  html[data-dark="true"] body::before { opacity: .08; mix-blend-mode: screen; }
+
+  /* ─── NAV ─── */
+  .nav-wrap { position: sticky; top: 0; z-index: 60; padding: 16px 0; transition: padding .3s, background .3s; }
+  .nav-wrap.scrolled { padding: 10px 0; backdrop-filter: saturate(160%) blur(14px); background: color-mix(in srgb, var(--bg) 80%, transparent); border-bottom: 1px solid var(--line-2); }
+  .nav { display: flex; align-items: center; gap: 28px; padding: 10px 20px; background: var(--glass); border: 1px solid var(--line); border-radius: 100px; backdrop-filter: blur(20px) saturate(140%); box-shadow: var(--shadow-sm); }
+  html[data-dark="true"] .nav { background: rgba(20,33,58,0.6); }
+  .logo { display: flex; align-items: center; gap: 10px; font-weight: 600; letter-spacing: -0.02em; font-size: 17px; }
+  .logo-mark {
+    width: 32px; height: 32px;
+    display: grid; place-items: center;
+    color: var(--brand-blue);
+    flex-shrink: 0;
+    transition: transform .3s cubic-bezier(.2,.7,.2,1);
+  }
+  .logo-mark svg { width: 100%; height: 100%; display: block; }
+  .logo:hover .logo-mark { transform: scale(1.06) rotate(-3deg); }
+  html[data-dark="true"] .logo-mark { color: #4A9EEF; }
+  .nav-links { display: flex; gap: 4px; margin-left: 12px; }
+  .nav-links a { position: relative; font-size: 14px; padding: 8px 14px; border-radius: 8px; color: var(--ink-3); font-weight: 500; transition: background .2s, color .2s; }
+  .nav-links a:hover { background: var(--bg-3); color: var(--ink); }
+  .nav-links a.active { color: var(--ink); background: var(--bg-3); }
+  .nav-links a.active::after {
+    content: ''; position: absolute;
+    left: 50%; bottom: 2px; transform: translateX(-50%);
+    width: 14px; height: 2px; border-radius: 100px;
+    background: var(--ink);
+    animation: navDotIn .3s ease;
+  }
+  @keyframes navDotIn { from { width: 0; opacity: 0; } to { width: 14px; opacity: 1; } }
+  .nav-cta { margin-left: auto; display: flex; gap: 8px; align-items: center; }
+
+  .btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; border-radius: 100px; font-weight: 500; font-size: 14px; transition: transform .15s, box-shadow .2s, background .2s; white-space: nowrap; }
+  .btn-ghost { color: var(--ink-3); }
+  .btn-ghost:hover { color: var(--ink); }
+  .btn-outline { border: 1px solid var(--line); background: var(--white); }
+  .btn-outline:hover { border-color: var(--ink-4); }
+  .btn-primary { background: var(--ink); color: #fff; box-shadow: 0 4px 12px -2px rgba(14,42,71,0.35), inset 0 1px 0 rgba(255,255,255,0.12); }
+  .btn-primary:hover { background: var(--ink-2); transform: translateY(-1px); box-shadow: 0 8px 20px -4px rgba(14,42,71,0.45), inset 0 1px 0 rgba(255,255,255,0.15); }
+  .btn-lg { padding: 14px 24px; font-size: 15px; }
+  .btn .arrow { transition: transform .2s; }
+  .btn:hover .arrow { transform: translateX(2px); }
+
+  /* ─── HERO ─── */
+  .hero { position: relative; padding: 64px 0 120px; overflow: hidden; }
+  .hero-bg {
+    position: absolute; inset: -100px 0 0 0; z-index: 0; pointer-events: none;
+  }
+  .hero-bg::before {
+    content: ''; position: absolute; inset: 0;
+    background:
+      radial-gradient(60% 50% at 70% 20%, rgba(74,119,176,0.28), transparent 60%),
+      radial-gradient(50% 60% at 20% 40%, rgba(14,42,71,0.10), transparent 70%),
+      radial-gradient(100% 70% at 50% 100%, rgba(14,42,71,0.06), transparent 70%);
+  }
+  .hero-bg::after {
+    content: ''; position: absolute; inset: 0;
+    background-image:
+      linear-gradient(to right, rgba(14,42,71,0.045) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(14,42,71,0.045) 1px, transparent 1px);
+    background-size: 56px 56px;
+    mask-image: radial-gradient(70% 60% at 50% 40%, black 30%, transparent 80%);
+  }
+  html[data-dark="true"] .hero-bg::before {
+    background:
+      radial-gradient(60% 50% at 70% 20%, rgba(74,119,176,0.25), transparent 60%),
+      radial-gradient(50% 60% at 20% 40%, rgba(36,65,104,0.4), transparent 70%);
+  }
+  html[data-dark="true"] .hero-bg::after {
+    background-image:
+      linear-gradient(to right, rgba(255,255,255,0.04) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255,255,255,0.04) 1px, transparent 1px);
+  }
+
+  .hero-grid { position: relative; z-index: 1; display: grid; grid-template-columns: 1fr; gap: 64px; }
+  .hero-copy { max-width: 780px; margin: 0 auto; text-align: center; }
+  .hero-pill {
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 6px 12px 6px 8px; border-radius: 100px;
+    background: var(--glass); border: 1px solid var(--line);
+    backdrop-filter: blur(10px);
+    font-size: 13px; color: var(--ink-3); margin-bottom: 28px;
+  }
+  .hero-pill .dot { width: 18px; height: 18px; border-radius: 100px; background: linear-gradient(135deg, var(--ink-3), var(--ink)); display: grid; place-items: center; color: #fff; font-size: 10px; box-shadow: 0 0 0 3px rgba(74,119,176,0.18); animation: pulse 2.6s ease-in-out infinite; }
+  .hero-pill .pill-chev { color: var(--ink-4); font-size: 12px; transition: transform .2s; }
+  .hero-pill:hover .pill-chev { transform: translateX(2px); color: var(--ink); }
+  @keyframes pulse { 0%, 100% { box-shadow: 0 0 0 3px rgba(74,119,176,0.18); } 50% { box-shadow: 0 0 0 6px rgba(74,119,176,0.08); } }
+  .hero h1 { font-size: clamp(44px, 6.2vw, 88px); margin: 0 0 24px; }
+  .hero h1 .sep { display: block; }
+  .hero p.lede { font-size: clamp(17px, 1.4vw, 20px); color: var(--ink-4); max-width: 620px; margin: 0 auto 36px; line-height: 1.5; }
+  .hero-ctas { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  .hero-meta { display: flex; gap: 28px; justify-content: center; margin-top: 28px; font-size: 13px; color: var(--ink-5); }
+  .hero-meta span { display: inline-flex; align-items: center; gap: 6px; }
+  .hero-meta svg { color: var(--ink-3); }
+
+  /* Hero dashboard stage */
+  .stage {
+    margin-top: 64px;
+    position: relative;
+    height: 600px;
+  }
+  .stage-plate {
+    position: absolute; left: 50%; top: 0; width: min(1180px, 95%);
+    transform: translateX(-50%) translateY(20px) scale(0.98);
+    opacity: 0.001;
+    transition: transform 1s cubic-bezier(.2,.7,.2,1), opacity .8s ease;
+  }
+  .stage-plate.settled { transform: translateX(-50%) translateY(0) scale(1); opacity: 1; }
+
+  .dash {
+    position: relative;
+    background: var(--white);
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: var(--shadow-lg);
+  }
+  .dash-chrome { display: flex; align-items: center; gap: 10px; padding: 14px 18px; border-bottom: 1px solid var(--line-2); background: var(--bg-2); }
+  .dash-chrome .dots { display: flex; gap: 6px; }
+  .dash-chrome .dots i { width: 10px; height: 10px; border-radius: 100px; background: #D8DFE8; display:block; }
+  .dash-chrome .addr { margin-left: 12px; font-family: var(--font-mono); font-size: 12px; color: var(--ink-5); background: var(--white); padding: 4px 10px; border-radius: 6px; border: 1px solid var(--line); }
+
+  .dash-body { display: grid; grid-template-columns: 220px 1fr; min-height: 480px; }
+  .dash-sidebar { border-right: 1px solid var(--line-2); padding: 20px 14px; background: var(--bg); }
+  .dash-sidebar .brand { display: flex; align-items: center; gap: 8px; padding: 0 8px 16px; font-weight: 600; font-size: 14px; letter-spacing: -0.01em; border-bottom: 1px solid var(--line-2); margin-bottom: 12px; }
+  .dash-sidebar .brand .mk { width: 22px; height: 22px; display: grid; place-items: center; color: var(--brand-blue); flex-shrink: 0; }
+  .dash-sidebar .brand .mk svg { width: 100%; height: 100%; }
+  .dash-sidebar .section-label { font-family: var(--font-mono); font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-5); padding: 10px 10px 6px; }
+  .dash-nav a { display: flex; align-items: center; gap: 10px; padding: 7px 10px; border-radius: 7px; font-size: 13px; color: var(--ink-3); }
+  .dash-nav a.active { background: var(--ink); color: #fff; box-shadow: inset 0 1px 0 rgba(255,255,255,0.1); }
+  html[data-dark="true"] .dash-nav a.active { background: #fff; color: var(--ink); }
+  .dash-nav a .ic { width: 14px; height: 14px; border-radius: 4px; background: currentColor; opacity: .3; flex-shrink: 0; }
+  .dash-nav a.active .ic { opacity: 1; }
+
+  .dash-main { padding: 22px 24px; display: flex; flex-direction: column; gap: 18px; }
+  .dash-head { display: flex; align-items: baseline; justify-content: space-between; }
+  .dash-head h3 { font-family: var(--font-display); font-weight: 400; font-size: 22px; margin: 0; letter-spacing: -0.02em; }
+  .dash-head .date { font-size: 12px; color: var(--ink-5); font-family: var(--font-mono); }
+
+  .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  .kpi { background: var(--bg); border: 1px solid var(--line-2); border-radius: 12px; padding: 14px; }
+  .kpi .label { font-size: 11px; color: var(--ink-5); text-transform: uppercase; letter-spacing: .08em; }
+  .kpi .val { font-family: var(--font-display); font-size: 26px; letter-spacing: -0.02em; margin-top: 4px; }
+  .kpi .delta { font-size: 11px; color: #0E7E52; font-family: var(--font-mono); margin-top: 2px; }
+  .kpi .delta.down { color: #B45454; }
+
+  .dash-grid { display: grid; grid-template-columns: 1.6fr 1fr; gap: 14px; flex: 1; min-height: 0; }
+  .panel { background: var(--bg); border: 1px solid var(--line-2); border-radius: 12px; padding: 14px; display: flex; flex-direction: column; }
+  .panel h4 { margin: 0 0 4px; font-size: 13px; font-weight: 600; letter-spacing: -0.01em; }
+  .panel .sub { font-size: 11px; color: var(--ink-5); margin-bottom: 12px; }
+
+  .chart { flex: 1; position: relative; min-height: 130px; }
+  .chart svg { width: 100%; height: 100%; overflow: visible; }
+
+  .room-grid { display: grid; grid-template-columns: repeat(8, 1fr); gap: 4px; }
+  .room { aspect-ratio: 1; border-radius: 4px; background: var(--line); position: relative; }
+  .room.occ { background: var(--ink); }
+  .room.clean { background: #A5BED8; }
+  .room.dirty { background: #E6B8B8; }
+
+  /* Floating badges around dash */
+  .float {
+    position: absolute; background: var(--white); border: 1px solid var(--line); border-radius: 14px;
+    padding: 12px 14px; box-shadow: var(--shadow-md); font-size: 12px;
+    backdrop-filter: blur(12px);
+    display: flex; align-items: center; gap: 10px;
+    z-index: 3;
+  }
+  html[data-dark="true"] .float { background: rgba(14,26,45,0.85); }
+  .float .mini-ic { width: 32px; height: 32px; border-radius: 8px; display: grid; place-items: center; background: var(--bg-3); flex-shrink: 0; }
+  .float .t1 { font-weight: 600; font-size: 13px; letter-spacing: -0.01em; }
+  .float .t2 { font-size: 11px; color: var(--ink-5); }
+  .float.f-booking { top: 14%; left: -4%; }
+  .float.f-occupancy { top: 8%; right: -3%; }
+  .float.f-revenue { bottom: 18%; right: -5%; }
+  .float.f-alert { bottom: 10%; left: -2%; }
+
+  /* AI copilot card */
+  .float.f-ai {
+    bottom: -22px; left: 50%; transform: translateX(-50%);
+    width: min(380px, 88%); padding: 14px 16px; display: block;
+    background: linear-gradient(180deg, var(--white) 0%, var(--bg) 100%);
+    border: 1px solid var(--line); border-radius: 16px;
+    box-shadow: 0 30px 60px -20px rgba(14,42,71,0.30), 0 10px 24px -8px rgba(14,42,71,0.15);
+    z-index: 4;
+  }
+  html[data-dark="true"] .float.f-ai { background: linear-gradient(180deg, rgba(20,33,58,0.95), rgba(14,26,45,0.95)); }
+  .ai-head { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .ai-avatar { width: 28px; height: 28px; border-radius: 8px; background: linear-gradient(135deg, var(--ink), #4A77B0); display: grid; place-items: center; color: #fff; font-size: 12px; letter-spacing: -0.02em; font-weight: 600; position: relative; flex-shrink: 0; }
+  .ai-avatar::after { content: ''; position: absolute; inset: -3px; border-radius: 11px; background: linear-gradient(135deg, rgba(74,119,176,0.4), transparent); z-index: -1; filter: blur(8px); }
+  .ai-name { font-size: 12px; font-weight: 600; letter-spacing: -0.01em; }
+  .ai-status { font-size: 10px; color: var(--ink-5); font-family: var(--font-mono); display: flex; align-items: center; gap: 4px; }
+  .ai-status::before { content: ''; width: 5px; height: 5px; border-radius: 100px; background: #10A36E; box-shadow: 0 0 0 2px rgba(16,163,110,0.2); }
+  .ai-q { font-size: 12px; color: var(--ink-4); margin-bottom: 8px; padding: 8px 10px; background: var(--bg-2); border-radius: 8px; border: 1px solid var(--line-2); }
+  .ai-a { font-size: 12.5px; color: var(--ink); line-height: 1.5; }
+  .ai-a .cursor { display: inline-block; width: 7px; height: 13px; background: var(--ink); margin-left: 2px; vertical-align: middle; animation: blink 1s steps(2) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  @keyframes bob {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+  }
+  .float.bob { animation: bob 6s ease-in-out infinite; }
+  .float.bob.d1 { animation-delay: -1.5s; }
+  .float.bob.d2 { animation-delay: -3s; }
+  .float.bob.d3 { animation-delay: -4.5s; }
+
+  /* ─── TRUST STRIP ─── */
+  .trust { padding: 40px 0 80px; position: relative; }
+  .trust-label { text-align: center; font-size: 13px; color: var(--ink-5); margin-bottom: 28px; }
+  .trust-row { display: grid; grid-template-columns: repeat(6, 1fr); gap: 32px; align-items: center; opacity: .7; }
+  .trust-row .logo-wm { height: 32px; display: grid; place-items: center; color: var(--ink-3); filter: grayscale(1); transition: opacity .2s; }
+  .trust-row .logo-wm:hover { opacity: 1; }
+
+  /* ─── SECTION FRAME ─── */
+  section.s { padding: var(--pad) 0; position: relative; }
+  .s-head { max-width: 720px; margin: 0 auto 64px; text-align: center; }
+  .s-head .eyebrow { margin-bottom: 16px; display: inline-block; }
+  .s-head h2 { font-size: clamp(36px, 4.4vw, 56px); margin: 0 0 16px; }
+  .s-head p { font-size: 17px; color: var(--ink-4); margin: 0; line-height: 1.55; }
+
+  /* ─── FEATURES GRID ─── */
+  .features-bg { background: var(--bg-2); }
+  .feat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: var(--r-xl); overflow: hidden; }
+  .feat { background: var(--bg); padding: 32px 28px; position: relative; transition: background .3s; min-height: 220px; display: flex; flex-direction: column; justify-content: space-between; gap: 24px; }
+  .feat:hover { background: var(--white); }
+  .feat-ic {
+    width: 44px; height: 44px; border-radius: 12px;
+    background: linear-gradient(135deg, var(--white), var(--bg-3));
+    border: 1px solid var(--line);
+    display: grid; place-items: center;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.8), 0 2px 4px rgba(14,42,71,0.04);
+    color: var(--ink);
+  }
+  html[data-dark="true"] .feat-ic { background: linear-gradient(135deg, var(--bg-2), var(--bg-3)); }
+  .feat h3 { font-family: var(--font-display); font-weight: 500; font-size: 20px; letter-spacing: -0.02em; margin: 0 0 6px; }
+  .feat p { margin: 0; font-size: 14px; color: var(--ink-4); line-height: 1.5; }
+  .feat .feat-num { position: absolute; top: 20px; right: 20px; font-family: var(--font-mono); font-size: 11px; color: var(--ink-6); letter-spacing: 0.1em; }
+
+  .feat-more { margin-top: 40px; text-align: center; }
+  .feat-more .eyebrow { margin-bottom: 14px; display: inline-block; }
+  .feat-chips { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+  .chip {
+    font-size: 13px; color: var(--ink-3);
+    padding: 8px 14px; border-radius: 100px;
+    background: var(--white); border: 1px solid var(--line);
+    transition: transform .15s, border-color .2s, color .2s;
+  }
+  .chip:hover { transform: translateY(-2px); border-color: var(--ink-4); color: var(--ink); }
+
+  /* ─── WHY METRICS ─── */
+  .why { background:
+    radial-gradient(70% 100% at 50% 0%, rgba(14,42,71,0.05), transparent 70%),
+    var(--bg);
+  }
+  .metrics {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    border: 1px solid var(--line); border-radius: var(--r-xl);
+    background: var(--white); overflow: hidden;
+    box-shadow: var(--shadow-md);
+  }
+  .metric { padding: 44px 32px; border-right: 1px solid var(--line-2); position: relative; }
+  .metric:last-child { border-right: none; }
+  .metric .big {
+    font-family: var(--font-display); font-weight: 400;
+    font-size: clamp(48px, 5.2vw, 76px);
+    letter-spacing: -0.04em; line-height: 1;
+    color: var(--ink);
+  }
+  .metric .big .unit { color: var(--ink-4); font-size: 0.55em; margin-left: 4px; }
+  .metric h4 { font-size: 15px; font-weight: 500; margin: 18px 0 6px; }
+  .metric p { font-size: 13px; color: var(--ink-5); margin: 0; line-height: 1.5; }
+
+  /* ─── PRODUCT PREVIEW with tabs ─── */
+  .preview { background: var(--bg-2); }
+  .tabs { display: flex; gap: 6px; justify-content: center; margin-bottom: 40px; padding: 6px; background: var(--white); border: 1px solid var(--line); border-radius: 100px; width: fit-content; margin-left: auto; margin-right: auto; }
+  .tab { padding: 10px 18px; border-radius: 100px; font-size: 14px; font-weight: 500; color: var(--ink-4); transition: background .2s, color .2s; }
+  .tab.active { background: var(--ink); color: #fff; }
+  .tab:hover:not(.active) { color: var(--ink); }
+
+  .preview-frame {
+    position: relative;
+    background: var(--white);
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    box-shadow: var(--shadow-lg);
+    overflow: hidden;
+    min-height: 540px;
+  }
+  .preview-chrome { display: flex; align-items: center; padding: 14px 20px; border-bottom: 1px solid var(--line-2); background: var(--bg); gap: 10px; }
+  .preview-chrome .dots i { width: 9px; height: 9px; border-radius: 100px; display: inline-block; background: #D8DFE8; margin-right: 5px; }
+  .preview-chrome .path { margin-left: 10px; font-family: var(--font-mono); font-size: 12px; color: var(--ink-5); }
+
+  .preview-panel { padding: 28px; display: none; animation: fadeUp .4s ease; }
+  .preview-panel.active { display: block; }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+  .pv-grid { display: grid; grid-template-columns: 280px 1fr; gap: 24px; }
+  .pv-list { display: flex; flex-direction: column; gap: 8px; }
+  .pv-list .item { padding: 12px 14px; border: 1px solid var(--line-2); border-radius: 10px; background: var(--bg); font-size: 13px; display: flex; justify-content: space-between; align-items: center; }
+  .pv-list .item .ttl { font-weight: 500; }
+  .pv-list .item .sub { font-size: 11px; color: var(--ink-5); margin-top: 2px; }
+  .pv-list .item.sel { background: var(--ink); color: #fff; border-color: var(--ink); }
+  .pv-list .item.sel .sub { color: rgba(255,255,255,0.6); }
+  .pv-list .item .badge { font-family: var(--font-mono); font-size: 10px; padding: 3px 8px; border-radius: 4px; background: var(--bg-3); color: var(--ink-3); }
+  .pv-list .item.sel .badge { background: rgba(255,255,255,0.15); color: #fff; }
+
+  .pv-detail { border: 1px solid var(--line-2); border-radius: 10px; padding: 20px; background: var(--bg); min-height: 420px; display: flex; flex-direction: column; gap: 14px; }
+
+  /* Calendar grid for Front Office */
+  .cal {
+    display: grid;
+    grid-template-columns: 140px repeat(14, 1fr);
+    gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; font-size: 11px;
+  }
+  .cal .hdr { background: var(--bg-2); padding: 8px 6px; text-align: center; font-family: var(--font-mono); color: var(--ink-5); font-size: 10px; }
+  .cal .room-lbl { background: var(--white); padding: 10px 12px; font-weight: 500; }
+  .cal .cell { background: var(--white); height: 34px; position: relative; }
+  .cal .res { position: absolute; top: 3px; bottom: 3px; background: var(--ink); border-radius: 4px; color: #fff; padding: 0 8px; display: flex; align-items: center; font-size: 10px; letter-spacing: -0.01em; white-space: nowrap; overflow: hidden; }
+  .cal .res.a2 { background: #3A5A80; }
+  .cal .res.a3 { background: #6B83A3; color: var(--ink-2); }
+  .cal .res.pending { background: repeating-linear-gradient(45deg, var(--ink-5), var(--ink-5) 4px, var(--ink-4) 4px, var(--ink-4) 8px); }
+
+  /* Channel list */
+  .ch-list { display: flex; flex-direction: column; gap: 10px; }
+  .ch-item { display: grid; grid-template-columns: 180px 1fr 100px 90px; gap: 16px; align-items: center; padding: 14px 16px; background: var(--white); border: 1px solid var(--line-2); border-radius: 10px; }
+  .ch-bar { height: 6px; background: var(--bg-3); border-radius: 100px; overflow: hidden; }
+  .ch-bar-fill { height: 100%; background: linear-gradient(90deg, var(--ink-3), var(--ink)); border-radius: 100px; }
+  .ch-meta { font-family: var(--font-mono); font-size: 11px; color: var(--ink-5); text-align: right; }
+  .pill-on { display: inline-block; font-family: var(--font-mono); font-size: 10px; padding: 3px 8px; border-radius: 100px; background: #E6F2EC; color: #0E7E52; letter-spacing: .06em; }
+  .pill-off { display: inline-block; font-family: var(--font-mono); font-size: 10px; padding: 3px 8px; border-radius: 100px; background: var(--bg-3); color: var(--ink-5); letter-spacing: .06em; }
+
+  /* Revenue panels */
+  .rev-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .rev-card { background: var(--white); border: 1px solid var(--line-2); border-radius: 10px; padding: 14px; }
+  .rev-card .l { font-size: 11px; color: var(--ink-5); text-transform: uppercase; letter-spacing: .08em; }
+  .rev-card .v { font-family: var(--font-display); font-size: 28px; letter-spacing: -0.02em; margin-top: 4px; }
+
+  /* ─── GLOBAL PRESENCE (bento) ─── */
+  @keyframes ping { 0% { transform: scale(1); opacity: 0.4; } 100% { transform: scale(2.8); opacity: 0; } }
+
+  .markets-hero {
+    display: grid; grid-template-columns: 1.4fr 1fr; gap: 16px;
+    margin-bottom: 16px;
+  }
+
+  /* Featured hero card */
+  .market-feature {
+    position: relative; overflow: hidden;
+    border-radius: var(--r-xl);
+    background: linear-gradient(135deg, var(--ink) 0%, var(--ink-2) 55%, #1A3A66 100%);
+    color: #fff;
+    padding: 40px 44px;
+    display: flex; flex-direction: column; justify-content: space-between; gap: 32px;
+    min-height: 340px;
+    box-shadow: 0 40px 80px -24px rgba(14,42,71,0.35), 0 10px 24px -10px rgba(14,42,71,0.18);
+    isolation: isolate;
+  }
+  .market-feature::before {
+    content: ''; position: absolute; inset: 0;
+    background:
+      radial-gradient(60% 60% at 85% 15%, rgba(74,119,176,0.45), transparent 60%),
+      radial-gradient(40% 60% at 0% 100%, rgba(27,117,187,0.25), transparent 60%);
+    z-index: -1;
+  }
+  .market-feature::after {
+    content: ''; position: absolute; inset: 0;
+    background-image:
+      linear-gradient(to right, rgba(255,255,255,0.04) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255,255,255,0.04) 1px, transparent 1px);
+    background-size: 36px 36px;
+    mask-image: radial-gradient(70% 80% at 80% 20%, black 30%, transparent 90%);
+    z-index: -1;
+  }
+  .mf-top { display: flex; align-items: center; justify-content: space-between; }
+  .mf-flag { font-size: 56px; line-height: 1; filter: drop-shadow(0 4px 12px rgba(0,0,0,0.25)); }
+  .mf-tag {
+    font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase;
+    color: rgba(255,255,255,0.75);
+    padding: 6px 12px; border-radius: 100px;
+    background: rgba(255,255,255,0.10); border: 1px solid rgba(255,255,255,0.16);
+    backdrop-filter: blur(10px);
+  }
+  .mf-name { font-family: var(--font-display); font-weight: 400; font-size: clamp(48px, 5vw, 72px); letter-spacing: -0.03em; line-height: 1; margin: 0; }
+  .mf-sub { color: rgba(255,255,255,0.72); font-size: 15px; margin-top: 10px; }
+  .mf-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .mf-chip {
+    font-size: 12px; padding: 7px 12px; border-radius: 100px;
+    background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.14);
+    color: rgba(255,255,255,0.92); backdrop-filter: blur(6px);
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .mf-chip .dot-g {
+    width: 6px; height: 6px; border-radius: 100px; background: #10A36E;
+    box-shadow: 0 0 0 3px rgba(16,163,110,0.22);
+    animation: ping 2.4s ease-out infinite;
+  }
+
+  /* Stats column */
+  .market-stats-col { display: grid; grid-template-rows: repeat(4, 1fr); gap: 10px; }
+  .market-stat {
+    position: relative; overflow: hidden;
+    background: var(--white); border: 1px solid var(--line); border-radius: var(--r-lg);
+    padding: 16px 20px; display: flex; flex-direction: column; justify-content: center;
+    transition: border-color .2s, transform .2s;
+  }
+  .market-stat:hover { border-color: var(--ink-4); transform: translateY(-1px); }
+  .market-stat .ms-v { font-family: var(--font-display); font-weight: 400; font-size: 36px; letter-spacing: -0.03em; line-height: 1; color: var(--ink); }
+  .market-stat .ms-v .ms-plus { color: var(--ink-4); font-size: 0.55em; margin-left: 2px; }
+  .market-stat .ms-l { font-size: 12px; color: var(--ink-5); margin-top: 4px; letter-spacing: 0.01em; }
+  .market-stat .ms-ic { position: absolute; top: 14px; right: 14px; color: var(--ink-5); opacity: .45; }
+
+  /* Country cards grid */
+  .market-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  .market-card {
+    position: relative;
+    background: var(--white); border: 1px solid var(--line); border-radius: var(--r-lg);
+    padding: 22px 22px 20px;
+    transition: transform .2s cubic-bezier(.2,.7,.2,1), border-color .2s, box-shadow .2s;
+    overflow: hidden;
+  }
+  .market-card::before {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(80% 60% at 100% 0%, rgba(27,117,187,0.06), transparent 60%);
+    opacity: 0; transition: opacity .25s;
+    pointer-events: none;
+  }
+  .market-card:hover { transform: translateY(-3px); border-color: var(--ink-4); box-shadow: 0 16px 32px -12px rgba(14,42,71,0.15); }
+  .market-card:hover::before { opacity: 1; }
+  .mc-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+  .mc-flag { font-size: 28px; line-height: 1; filter: drop-shadow(0 2px 6px rgba(0,0,0,0.08)); }
+  .mc-count { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.1em; color: var(--ink-5); padding: 4px 10px; border-radius: 100px; background: var(--bg-2); text-transform: uppercase; }
+  .mc-count-soon { background: linear-gradient(135deg, var(--ink), var(--ink-3)); color: #fff; }
+  .market-card h4 { font-family: var(--font-display); font-weight: 500; font-size: 20px; letter-spacing: -0.015em; margin: 0 0 4px; }
+  .mc-cities { font-size: 12px; color: var(--ink-5); margin-bottom: 14px; }
+  .mc-feat { font-size: 11.5px; color: var(--ink-4); padding-top: 12px; border-top: 1px dashed var(--line-2); font-family: var(--font-mono); letter-spacing: 0.01em; }
+  .market-card.coming { background: linear-gradient(180deg, var(--bg) 0%, var(--bg-2) 100%); }
+
+  /* ─── IMPLEMENTATION TIMELINE ─── */
+  .timeline-bg { background: var(--bg-2); position: relative; overflow: hidden; }
+  .timeline-bg::before {
+    content: ''; position: absolute; inset: 0;
+    background-image:
+      linear-gradient(to right, rgba(14,42,71,0.03) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(14,42,71,0.03) 1px, transparent 1px);
+    background-size: 48px 48px;
+    mask-image: radial-gradient(70% 80% at 50% 30%, black 30%, transparent 90%);
+    pointer-events: none;
+  }
+  .timeline {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+    background: var(--white);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 48px 0 44px;
+    box-shadow: var(--shadow-md);
+    overflow: hidden;
+  }
+
+  /* The connecting rail — spans exactly marker-center to marker-center */
+  .tl-line {
+    position: absolute; top: 73px;
+    left: 12.5%; right: 12.5%;
+    height: 2px; background: var(--line);
+    z-index: 0; border-radius: 100px; overflow: hidden;
+  }
+  .tl-line::before {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(90deg, var(--ink-3) 0%, var(--ink) 50%, var(--ink-3) 100%);
+    transform-origin: 0 50%;
+    transform: scaleX(0);
+    transition: transform 2.2s cubic-bezier(.65, 0, .35, 1);
+  }
+  .tl-line::after {
+    content: ''; position: absolute;
+    top: -2px; bottom: -2px; width: 80px;
+    background: linear-gradient(90deg, transparent, rgba(74,119,176,0.95), rgba(255,255,255,0.6), rgba(74,119,176,0.95), transparent);
+    filter: blur(2px);
+    transform: translateX(-100px);
+    opacity: 0;
+    border-radius: 100px;
+  }
+  .timeline.in .tl-line::before { transform: scaleX(1); }
+  .timeline.in .tl-line::after {
+    opacity: 1;
+    animation: tl-sweep 3.2s cubic-bezier(.4,0,.2,1) infinite;
+    animation-delay: 2.4s;
+  }
+  @keyframes tl-sweep {
+    0%   { transform: translateX(-120px); opacity: 0; }
+    8%   { opacity: 1; }
+    92%  { opacity: 1; }
+    100% { transform: translateX(var(--tl-sweep-w, 100vw)); opacity: 0; }
+  }
+
+  .tl-step { position: relative; padding: 0 28px; z-index: 1; text-align: center; }
+  .tl-step + .tl-step { border-left: 1px dashed var(--line-2); }
+
+  /* Marker — starts outlined, fills sequentially as rail reaches it */
+  .tl-marker {
+    width: 52px; height: 52px; border-radius: 100px;
+    background: var(--white); border: 2px solid var(--line);
+    display: grid; place-items: center; margin: 0 auto 22px;
+    font-family: var(--font-display); font-size: 18px; color: var(--ink-4);
+    box-shadow: 0 0 0 6px var(--white), 0 6px 16px -6px rgba(14,42,71,0.15);
+    position: relative;
+    transition: background .4s ease, color .4s ease, border-color .4s ease, box-shadow .4s ease, transform .4s cubic-bezier(.2,.7,.2,1);
+  }
+
+  /* Cascade fill: each marker lights up as the rail reaches its position */
+  .timeline.in .tl-step:nth-child(1) .tl-marker { transition-delay: 0.15s; }
+  .timeline.in .tl-step:nth-child(2) .tl-marker { transition-delay: 0.75s; }
+  .timeline.in .tl-step:nth-child(3) .tl-marker { transition-delay: 1.35s; }
+  .timeline.in .tl-step:nth-child(4) .tl-marker { transition-delay: 1.95s; }
+  .timeline.in .tl-marker {
+    background: var(--ink); color: #fff; border-color: var(--ink);
+    box-shadow: 0 0 0 6px var(--white), 0 10px 24px -8px rgba(14,42,71,0.45);
+    transform: scale(1.04);
+  }
+
+  /* Ambient pulse rings, staggered so they don't read as chaos */
+  .tl-marker::after {
+    content: ''; position: absolute; inset: -4px; border-radius: 100px;
+    border: 2px solid var(--ink);
+    opacity: 0; pointer-events: none;
+  }
+  .timeline.in .tl-step:nth-child(1) .tl-marker::after { animation: tl-ring 3s ease-out infinite; animation-delay: 2.6s; }
+  .timeline.in .tl-step:nth-child(2) .tl-marker::after { animation: tl-ring 3s ease-out infinite; animation-delay: 3.0s; }
+  .timeline.in .tl-step:nth-child(3) .tl-marker::after { animation: tl-ring 3s ease-out infinite; animation-delay: 3.4s; }
+  .timeline.in .tl-step:nth-child(4) .tl-marker::after { animation: tl-ring 3s ease-out infinite; animation-delay: 3.8s; }
+  @keyframes tl-ring {
+    0%   { transform: scale(0.95); opacity: 0.5; }
+    100% { transform: scale(1.4); opacity: 0; }
+  }
+
+  .tl-stamp { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-5); margin-bottom: 8px; }
+  .tl-step h4 { font-family: var(--font-display); font-weight: 500; font-size: 20px; letter-spacing: -0.01em; margin: 0 0 8px; }
+  .tl-step p { font-size: 13px; color: var(--ink-5); line-height: 1.5; margin: 0; }
+
+  /* Content cascade — text slides up just after the marker lights */
+  .tl-stamp, .tl-step h4, .tl-step p {
+    opacity: 0; transform: translateY(10px);
+    transition: opacity .55s ease, transform .55s cubic-bezier(.2,.7,.2,1);
+  }
+  .timeline.in .tl-stamp,
+  .timeline.in .tl-step h4,
+  .timeline.in .tl-step p { opacity: 1; transform: none; }
+  .timeline.in .tl-step:nth-child(1) .tl-stamp { transition-delay: 0.35s; }
+  .timeline.in .tl-step:nth-child(1) h4    { transition-delay: 0.45s; }
+  .timeline.in .tl-step:nth-child(1) p     { transition-delay: 0.55s; }
+  .timeline.in .tl-step:nth-child(2) .tl-stamp { transition-delay: 0.95s; }
+  .timeline.in .tl-step:nth-child(2) h4    { transition-delay: 1.05s; }
+  .timeline.in .tl-step:nth-child(2) p     { transition-delay: 1.15s; }
+  .timeline.in .tl-step:nth-child(3) .tl-stamp { transition-delay: 1.55s; }
+  .timeline.in .tl-step:nth-child(3) h4    { transition-delay: 1.65s; }
+  .timeline.in .tl-step:nth-child(3) p     { transition-delay: 1.75s; }
+  .timeline.in .tl-step:nth-child(4) .tl-stamp { transition-delay: 2.15s; }
+  .timeline.in .tl-step:nth-child(4) h4    { transition-delay: 2.25s; }
+  .timeline.in .tl-step:nth-child(4) p     { transition-delay: 2.35s; }
+
+  /* Reduced-motion: skip animations, show final state */
+  @media (prefers-reduced-motion: reduce) {
+    .tl-line::before { transform: scaleX(1); transition: none; }
+    .tl-line::after { display: none; }
+    .tl-marker { background: var(--ink); color: #fff; border-color: var(--ink); transition: none; transform: none; }
+    .tl-marker::after { display: none; }
+    .tl-stamp, .tl-step h4, .tl-step p { opacity: 1; transform: none; transition: none; }
+  }
+
+  /* ─── TESTIMONIALS ─── */
+  .quotes { display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: 20px; }
+  .quote { border: 1px solid var(--line); border-radius: var(--r-lg); padding: 32px; background: var(--white); display: flex; flex-direction: column; gap: 24px; position: relative; }
+  .quote.lg { background: var(--ink); color: #fff; border-color: var(--ink); }
+  .quote.lg .q-name, .quote.lg .q-role { color: rgba(255,255,255,0.7); }
+  .quote.lg .q-name b { color: #fff; }
+  .quote .q-text { font-family: var(--font-display); font-weight: 400; font-size: 22px; line-height: 1.35; letter-spacing: -0.015em; margin: 0; }
+  .quote.lg .q-text { font-size: 30px; }
+  .quote .q-person { display: flex; align-items: center; gap: 12px; margin-top: auto; }
+  .q-ava {
+    width: 44px; height: 44px; border-radius: 100px;
+    background: linear-gradient(135deg, var(--ink-3), var(--ink-5));
+    border: 1px solid var(--line); flex-shrink: 0;
+    display: grid; place-items: center; color: #fff;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.18), 0 2px 6px rgba(14,42,71,0.18);
+    overflow: hidden;
+  }
+  .q-ava svg { width: 26px; height: 26px; display: block; }
+  .quote.lg .q-ava { background: linear-gradient(135deg, #6B83A3, #9DB0C7); border-color: rgba(255,255,255,0.2); }
+  .q-name { font-size: 13px; color: var(--ink-4); line-height: 1.35; }
+  .q-name b { color: var(--ink); font-weight: 600; display: block; font-size: 14px; }
+  .q-brand { font-family: var(--font-display); font-style: italic; font-size: 18px; opacity: .5; }
+  .q-stars { display: flex; gap: 2px; margin-bottom: -6px; }
+
+  /* ─── COMPARISON ─── */
+  .compare-bg { background: var(--bg-2); }
+  .compare-switch { display: flex; justify-content: center; margin-bottom: 32px; }
+  .compare-switch .sw { display: flex; padding: 6px; background: var(--white); border: 1px solid var(--line); border-radius: 100px; }
+  .compare-switch .sw button { padding: 10px 20px; border-radius: 100px; font-size: 13px; font-weight: 500; color: var(--ink-4); }
+  .compare-switch .sw button.on { background: var(--ink); color: #fff; }
+
+  .compare-table {
+    background: var(--white); border: 1px solid var(--line); border-radius: var(--r-xl); overflow: hidden; box-shadow: var(--shadow-md);
+  }
+  .compare-row { display: grid; grid-template-columns: 1.4fr 1fr 1fr; }
+  .compare-row + .compare-row { border-top: 1px solid var(--line-2); }
+  .compare-row > div { padding: 20px 24px; font-size: 14px; display: flex; align-items: center; gap: 8px; }
+  .compare-row.head { background: var(--bg); font-weight: 600; font-size: 13px; text-transform: uppercase; letter-spacing: .06em; color: var(--ink-5); }
+  .compare-row.head .us { color: var(--ink); text-transform: none; letter-spacing: -0.01em; font-size: 15px; }
+  .compare-row .cat { font-weight: 500; color: var(--ink); }
+  .compare-row .cell-us { background: linear-gradient(180deg, rgba(14,42,71,0.02), rgba(14,42,71,0.04)); color: var(--ink); font-weight: 500; position: relative; }
+  .compare-row .cell-us::before { content:''; position: absolute; left:0; top: 0; width: 2px; height: 100%; background: var(--ink); }
+  .cmark { width: 16px; height: 16px; border-radius: 100px; background: var(--ink); display: inline-grid; place-items: center; color: #fff; flex-shrink: 0; }
+  .xmark { width: 16px; height: 16px; border-radius: 100px; background: var(--line); display: inline-grid; place-items: center; color: var(--ink-5); flex-shrink: 0; }
+
+  /* ─── CTA BANNER ─── */
+  .cta-banner {
+    position: relative; overflow: hidden; border-radius: var(--r-xl);
+    background:
+      radial-gradient(80% 120% at 0% 0%, rgba(74,119,176,0.35), transparent 60%),
+      radial-gradient(60% 100% at 100% 100%, rgba(255,255,255,0.08), transparent 60%),
+      linear-gradient(135deg, var(--ink) 0%, var(--ink-2) 100%);
+    color: #fff;
+    padding: 80px 64px;
+    text-align: center;
+  }
+  .cta-banner::before {
+    content: ''; position: absolute; inset: 0;
+    background-image:
+      linear-gradient(to right, rgba(255,255,255,0.04) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255,255,255,0.04) 1px, transparent 1px);
+    background-size: 48px 48px;
+    mask-image: radial-gradient(60% 80% at 50% 50%, black 40%, transparent 100%);
+  }
+  .cta-banner > * { position: relative; }
+  .cta-banner h2 { font-family: var(--font-display); font-weight: 400; font-size: clamp(40px, 5.4vw, 72px); letter-spacing: -0.03em; margin: 0 0 16px; line-height: 1.02; }
+  .cta-banner p { max-width: 520px; margin: 0 auto 36px; color: rgba(255,255,255,0.7); font-size: 17px; }
+  .cta-banner .btn-primary { background: #fff; color: var(--ink); }
+  .cta-banner .btn-primary:hover { background: #fff; color: var(--ink-2); }
+  .cta-banner .btn-outline { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.2); color: #fff; backdrop-filter: blur(8px); }
+  .cta-banner .btn-outline:hover { background: rgba(255,255,255,0.12); border-color: rgba(255,255,255,0.3); }
+
+  /* ─── FOOTER ─── */
+  footer { padding: 80px 0 40px; border-top: 1px solid var(--line); margin-top: 96px; }
+  .foot-grid { display: grid; grid-template-columns: 1.5fr repeat(4, 1fr); gap: 48px; margin-bottom: 64px; }
+  .foot-brand p { font-size: 14px; color: var(--ink-4); max-width: 300px; line-height: 1.6; margin: 16px 0 24px; }
+  .foot-socials { display: flex; gap: 8px; }
+  .foot-socials a { width: 34px; height: 34px; border-radius: 100px; border: 1px solid var(--line); display: grid; place-items: center; color: var(--ink-4); transition: color .2s, border-color .2s; }
+  .foot-socials a:hover { color: var(--ink); border-color: var(--ink-4); }
+  .foot-col h5 { font-size: 12px; text-transform: uppercase; letter-spacing: .1em; color: var(--ink-5); margin: 0 0 16px; font-weight: 600; }
+  .foot-col ul { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px; }
+  .foot-col a { font-size: 14px; color: var(--ink-3); transition: color .2s; }
+  .foot-col a:hover { color: var(--ink); }
+  .foot-bottom { display: flex; justify-content: space-between; align-items: center; padding-top: 32px; border-top: 1px solid var(--line-2); font-size: 13px; color: var(--ink-5); }
+  .foot-bottom .legal { display: flex; gap: 24px; }
+
+  /* ─── DEMO MODAL ─── */
+  .modal-wrap { position: fixed; inset: 0; z-index: 100; display: none; align-items: center; justify-content: center; padding: 32px; }
+  .modal-wrap.open { display: flex; }
+  .modal-bg { position: absolute; inset: 0; background: rgba(10,20,35,0.6); backdrop-filter: blur(8px); animation: fadeIn .25s ease; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  .modal {
+    position: relative; background: var(--white); border-radius: var(--r-xl);
+    max-width: 920px; width: 100%; box-shadow: var(--shadow-lg);
+    display: grid; grid-template-columns: 1fr 1fr; overflow: hidden;
+    animation: modalIn .35s cubic-bezier(.2,.7,.2,1);
+  }
+  @keyframes modalIn { from { opacity: 0; transform: translateY(12px) scale(.98); } to { opacity: 1; transform: none; } }
+  .modal-close { position: absolute; top: 18px; right: 18px; width: 34px; height: 34px; border-radius: 100px; background: var(--bg-2); display: grid; place-items: center; z-index: 2; }
+  .modal-close:hover { background: var(--bg-3); }
+  .modal-side {
+    background:
+      radial-gradient(60% 80% at 0% 0%, rgba(74,119,176,0.25), transparent 60%),
+      linear-gradient(160deg, var(--ink) 0%, var(--ink-2) 100%);
+    color: #fff; padding: 44px 36px; display: flex; flex-direction: column; gap: 20px;
+    position: relative; overflow: hidden;
+  }
+  .modal-side::before {
+    content: ''; position: absolute; inset: 0;
+    background-image: linear-gradient(to right, rgba(255,255,255,0.06) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.06) 1px, transparent 1px);
+    background-size: 32px 32px; mask-image: radial-gradient(60% 70% at 30% 30%, black 30%, transparent 100%);
+  }
+  .modal-side h3 { font-family: var(--font-display); font-weight: 400; font-size: 30px; letter-spacing: -0.02em; margin: 0; line-height: 1.1; position: relative; }
+  .modal-side p { margin: 0; color: rgba(255,255,255,0.7); font-size: 14px; position: relative; }
+  .modal-side ul { list-style: none; padding: 0; margin: 12px 0 0; display: flex; flex-direction: column; gap: 10px; font-size: 14px; position: relative; }
+  .modal-side ul li { display: flex; gap: 10px; align-items: center; color: rgba(255,255,255,0.85); }
+  .modal-side ul li .cmark { background: #fff; color: var(--ink); }
+  .modal-form { padding: 44px 36px; }
+  .modal-form h4 { font-family: var(--font-display); font-weight: 400; font-size: 22px; margin: 0 0 24px; letter-spacing: -0.02em; }
+  .modal-form label { display: block; font-size: 12px; color: var(--ink-5); margin-bottom: 6px; letter-spacing: .04em; }
+  .modal-form .field { margin-bottom: 14px; }
+  .modal-form input, .modal-form select { width: 100%; padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; font-size: 14px; font-family: inherit; background: var(--white); color: var(--ink); transition: border-color .2s, box-shadow .2s; }
+  .modal-form input:focus, .modal-form select:focus { outline: none; border-color: var(--ink-4); box-shadow: 0 0 0 3px rgba(14,42,71,0.08); }
+  .modal-form .two { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .modal-form button[type=submit] { width: 100%; margin-top: 8px; }
+  .modal-success { padding: 60px 36px; text-align: center; display: none; }
+  .modal-success.show { display: block; animation: fadeUp .4s ease; }
+  .modal-success .ok { width: 56px; height: 56px; border-radius: 100px; margin: 0 auto 20px; background: var(--ink); color: #fff; display: grid; place-items: center; }
+
+  /* ─── TWEAKS PANEL ─── */
+  .tweaks { position: fixed; bottom: 24px; right: 24px; z-index: 80; background: var(--white); border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--shadow-lg); padding: 16px; width: 260px; display: none; }
+  .tweaks.show { display: block; }
+  .tweaks h5 { margin: 0 0 14px; font-size: 12px; text-transform: uppercase; letter-spacing: .1em; color: var(--ink-5); font-weight: 600; display: flex; justify-content: space-between; align-items: center; }
+  .tweak { margin-bottom: 12px; }
+  .tweak label { font-size: 12px; color: var(--ink-4); margin-bottom: 6px; display: block; }
+  .tweak .swatches { display: flex; gap: 6px; }
+  .swatch { width: 26px; height: 26px; border-radius: 6px; cursor: pointer; border: 2px solid transparent; transition: transform .15s; }
+  .swatch.on { border-color: var(--ink-5); transform: scale(1.05); }
+  .tweak-seg { display: flex; background: var(--bg-2); border-radius: 6px; padding: 2px; }
+  .tweak-seg button { flex: 1; padding: 5px 8px; font-size: 12px; border-radius: 4px; color: var(--ink-4); }
+  .tweak-seg button.on { background: var(--white); color: var(--ink); box-shadow: var(--shadow-sm); }
+
+  /* Reveal on scroll */
+  .reveal { opacity: 0; transform: translateY(24px); transition: opacity .8s ease, transform .8s cubic-bezier(.2,.7,.2,1); }
+  .reveal.in { opacity: 1; transform: none; }
+  .reveal.d1 { transition-delay: .08s; }
+  .reveal.d2 { transition-delay: .16s; }
+  .reveal.d3 { transition-delay: .24s; }
+  .reveal.d4 { transition-delay: .32s; }
+
+  /* Responsive */
+  @media (max-width: 980px) {
+    .dash-body { grid-template-columns: 1fr; }
+    .dash-sidebar { display: none; }
+    .kpi-row { grid-template-columns: repeat(2, 1fr); }
+    .feat-grid { grid-template-columns: repeat(2, 1fr); }
+    .metrics { grid-template-columns: repeat(2, 1fr); }
+    .metric { border-right: none; border-bottom: 1px solid var(--line-2); }
+    .metric:nth-child(even) { border-right: none; }
+    .quotes { grid-template-columns: 1fr; }
+    .pv-grid { grid-template-columns: 1fr; }
+    .foot-grid { grid-template-columns: 1fr 1fr; }
+    .modal { grid-template-columns: 1fr; max-width: 520px; }
+    .modal-side { display: none; }
+    .nav-links { display: none; }
+    .trust-row { grid-template-columns: repeat(3, 1fr); gap: 24px; }
+    .float { display: none; }
+    .stage { height: 440px; }
+    .hero { padding: 32px 0 100px; }
+    .markets-hero { grid-template-columns: 1fr; }
+    .market-stats-col { grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(2, 1fr); }
+    .market-grid { grid-template-columns: repeat(2, 1fr); }
+    .market-feature { padding: 32px 28px; min-height: 280px; }
+    .mf-name { font-size: clamp(40px, 10vw, 56px); }
+    .timeline { grid-template-columns: 1fr; gap: 24px; }
+    .tl-line { display: none; }
+    .tl-step + .tl-step { border-left: none; border-top: 1px dashed var(--line-2); padding-top: 24px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="scroll-progress" id="scrollProgress"></div>
+
+<!-- ──────────────── NAV ──────────────── -->
+<div class="nav-wrap" id="nav">
+  <div class="container">
+    <nav class="nav">
+      <a href="#" class="logo">
+        <span class="logo-mark" aria-hidden="true">
+          <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
+            <path d="M22 12c-5.5 0-10 4-10.6 9.4C7.6 22.4 5 25.9 5 30c0 4.9 3.9 9 8.9 9H30c1.1 0 2-.9 2-2V24.5c0-.9-.7-1.5-1.5-1.5H25c-.3-6-5.2-11-11-11z"/>
+            <rect x="26" y="26" width="32" height="22" rx="2.5"/>
+            <rect x="50" y="30" width="2.5" height="3" rx="1" fill="#fff"/>
+            <rect x="50" y="36" width="2.5" height="6" rx="1" fill="#fff"/>
+            <path d="M36 48h12l2 5H34z"/>
+            <rect x="32" y="52" width="20" height="2.5" rx="1"/>
+          </svg>
+        </span>
+        <span>BluePMS</span>
+      </a>
+      <div class="nav-links">
+        <a href="#features">Platform</a>
+        <a href="#preview">Product</a>
+        <a href="#global">Global</a>
+        <a href="#golive">Go-live</a>
+        <a href="#compare">Compare</a>
+        <a href="#testimonials">Customers</a>
+      </div>
+      <div class="nav-cta">
+        <button class="btn btn-ghost" onclick="document.getElementById('features').scrollIntoView({behavior:'smooth'})">Explore Features</button>
+        <button class="btn btn-primary" onclick="openModal()">Go LIVE NOW! <span class="arrow">→</span></button>
+      </div>
+    </nav>
+  </div>
+</div>
+
+<!-- ──────────────── HERO ──────────────── -->
+<section class="hero" data-screen-label="01 Hero">
+  <div class="hero-bg"></div>
+  <div class="container">
+    <div class="hero-grid">
+      <div class="hero-copy">
+        <div class="hero-pill reveal in">
+          <span class="dot">✦</span>
+          <span>BluePMS 2.0 — AI co-pilot for every shift, now live</span>
+          <span class="pill-chev">→</span>
+        </div>
+        <h1 class="h-display reveal in d1">
+          The AI operating system
+          <span class="sep">for <em>modern hotels.</em></span>
+        </h1>
+        <p class="lede reveal in d2">Front office, POS, housekeeping, F&amp;B, inventory, CRM and revenue — unified on a 100% cloud platform that goes live in 48 hours, not 48 weeks.</p>
+        <div class="hero-ctas reveal in d3">
+          <button class="btn btn-primary btn-lg" onclick="openModal()">Go LIVE NOW! <span class="arrow">→</span></button>
+          <button class="btn btn-outline btn-lg" onclick="document.getElementById('features').scrollIntoView({behavior:'smooth'})">
+            Explore Features
+          </button>
+        </div>
+        <div class="hero-meta reveal in d4">
+          <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg> 48-hour go-live</span>
+          <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg> No upfront hardware</span>
+          <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg> SOC 2 · GDPR · PCI-DSS · ISO 27001</span>
+        </div>
+      </div>
+
+      <div class="stage">
+        <div class="stage-plate" id="stagePlate">
+          <div class="dash">
+            <div class="dash-chrome">
+              <div class="dots"><i></i><i></i><i></i></div>
+              <div class="addr">app.bluepms.com / dashboard</div>
+            </div>
+            <div class="dash-body">
+              <aside class="dash-sidebar">
+                <div class="brand">
+                  <span class="mk" aria-hidden="true">
+                    <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
+                      <path d="M22 12c-5.5 0-10 4-10.6 9.4C7.6 22.4 5 25.9 5 30c0 4.9 3.9 9 8.9 9H30c1.1 0 2-.9 2-2V24.5c0-.9-.7-1.5-1.5-1.5H25c-.3-6-5.2-11-11-11z"/>
+                      <rect x="26" y="26" width="32" height="22" rx="2.5"/>
+                      <path d="M36 48h12l2 5H34z"/>
+                      <rect x="32" y="52" width="20" height="2.5" rx="1"/>
+                    </svg>
+                  </span>
+                  Lagoon Bay Resort
+                </div>
+                <div class="section-label">Operations</div>
+                <nav class="dash-nav">
+                  <a class="active"><span class="ic"></span> Dashboard</a>
+                  <a><span class="ic"></span> Front Office</a>
+                  <a><span class="ic"></span> Housekeeping</a>
+                  <a><span class="ic"></span> POS &amp; Billing</a>
+                  <a><span class="ic"></span> F&amp;B Costing</a>
+                </nav>
+                <div class="section-label">Intelligence</div>
+                <nav class="dash-nav">
+                  <a><span class="ic"></span> Revenue AI</a>
+                  <a><span class="ic"></span> Guest CRM</a>
+                  <a><span class="ic"></span> Channels</a>
+                  <a><span class="ic"></span> Purchase &amp; Inventory</a>
+                </nav>
+              </aside>
+              <main class="dash-main">
+                <div class="dash-head">
+                  <h3>Good morning, Priya</h3>
+                  <span class="date">Tue, Apr 21 · 07:42</span>
+                </div>
+                <div class="kpi-row">
+                  <div class="kpi"><div class="label">Occupancy</div><div class="val">87<span style="font-size:16px;color:var(--ink-5)">%</span></div><div class="delta">↑ 4.2 vs last wk</div></div>
+                  <div class="kpi"><div class="label">ADR</div><div class="val">$312</div><div class="delta">↑ 2.8%</div></div>
+                  <div class="kpi"><div class="label">RevPAR</div><div class="val">$271</div><div class="delta">↑ 5.9%</div></div>
+                  <div class="kpi"><div class="label">Arrivals</div><div class="val">42</div><div class="delta down">↓ 3</div></div>
+                </div>
+                <div class="dash-grid">
+                  <div class="panel">
+                    <h4>Revenue &amp; forecast</h4>
+                    <div class="sub">Last 14 days · pacing +8.4%</div>
+                    <div class="chart">
+                      <svg viewBox="0 0 400 140" preserveAspectRatio="none">
+                        <defs>
+                          <linearGradient id="gfill" x1="0" x2="0" y1="0" y2="1">
+                            <stop offset="0%" stop-color="#0E2A47" stop-opacity="0.18"/>
+                            <stop offset="100%" stop-color="#0E2A47" stop-opacity="0"/>
+                          </linearGradient>
+                        </defs>
+                        <g stroke="#EEF2F8" stroke-width="1">
+                          <line x1="0" y1="35" x2="400" y2="35"/>
+                          <line x1="0" y1="70" x2="400" y2="70"/>
+                          <line x1="0" y1="105" x2="400" y2="105"/>
+                        </g>
+                        <path d="M0,95 C30,85 50,70 80,72 S130,60 160,55 200,48 230,42 280,36 310,30 350,22 400,18 L400,140 L0,140 Z" fill="url(#gfill)"/>
+                        <path d="M0,95 C30,85 50,70 80,72 S130,60 160,55 200,48 230,42 280,36 310,30 350,22 400,18" fill="none" stroke="#0E2A47" stroke-width="2" stroke-linecap="round"/>
+                        <path d="M230,42 C260,40 280,36 310,30 S370,22 400,14" fill="none" stroke="#6B83A3" stroke-width="1.5" stroke-dasharray="3 3"/>
+                        <circle cx="310" cy="30" r="3.5" fill="#0E2A47"/>
+                        <circle cx="310" cy="30" r="7" fill="#0E2A47" opacity=".18"/>
+                      </svg>
+                    </div>
+                  </div>
+                  <div class="panel">
+                    <h4>Room status</h4>
+                    <div class="sub">128 rooms · live</div>
+                    <div class="room-grid" id="roomGrid"></div>
+                    <div style="display:flex; gap:12px; margin-top:12px; font-size:10px; color:var(--ink-5); flex-wrap: wrap;">
+                      <span style="display:flex;align-items:center;gap:4px"><i style="width:8px;height:8px;border-radius:2px;background:var(--ink);display:inline-block"></i> Occupied</span>
+                      <span style="display:flex;align-items:center;gap:4px"><i style="width:8px;height:8px;border-radius:2px;background:#A5BED8;display:inline-block"></i> Ready</span>
+                      <span style="display:flex;align-items:center;gap:4px"><i style="width:8px;height:8px;border-radius:2px;background:#E6B8B8;display:inline-block"></i> Cleaning</span>
+                    </div>
+                  </div>
+                </div>
+              </main>
+            </div>
+          </div>
+        </div>
+
+        <!-- Floating cards -->
+        <div class="float f-booking bob d1">
+          <div class="mini-ic">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+          </div>
+          <div>
+            <div class="t1">New booking · Suite 402</div>
+            <div class="t2">direct · 3 nts · $1,284</div>
+          </div>
+        </div>
+        <div class="float f-occupancy bob d2">
+          <div class="mini-ic">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20V10M18 20V4M6 20v-6"/></svg>
+          </div>
+          <div>
+            <div class="t1">87% occupied tonight</div>
+            <div class="t2">+4.2 vs last week</div>
+          </div>
+        </div>
+        <div class="float f-revenue bob d3">
+          <div class="mini-ic">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v12M16 10c0-2-2-3-4-3s-4 1-4 3 2 2 4 2 4 0 4 2-2 3-4 3-4-1-4-3"/></svg>
+          </div>
+          <div>
+            <div class="t1">$38,412 <span style="color:#0E7E52">↑</span></div>
+            <div class="t2">today&rsquo;s revenue</div>
+          </div>
+        </div>
+        <div class="float f-alert bob">
+          <div class="mini-ic">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 20h20L12 2zM12 8v5M12 17v.1"/></svg>
+          </div>
+          <div>
+            <div class="t1">AI: raise rate on 204</div>
+            <div class="t2">demand spike detected</div>
+          </div>
+        </div>
+
+        <!-- AI co-pilot chat -->
+        <div class="float f-ai" id="aiFloat">
+          <div class="ai-head">
+            <div class="ai-avatar">B</div>
+            <div style="flex:1">
+              <div class="ai-name">Blue · AI co-pilot</div>
+              <div class="ai-status">ready · thinking on your data</div>
+            </div>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--ink-5)" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </div>
+          <div class="ai-q">"How's my weekend pacing vs last year?"</div>
+          <div class="ai-a" id="aiAnswer"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ──────────────── TRUST ──────────────── -->
+<section class="trust" data-screen-label="02 Trust">
+  <div class="container">
+    <div class="trust-label reveal">Trusted by 2,400+ hotels across India, the Gulf and South Asia</div>
+    <div class="trust-row reveal d1">
+      <div class="logo-wm" style="font-family:var(--font-display); font-style:italic; font-size:22px; letter-spacing:-.02em;">Taveer</div>
+      <div class="logo-wm" style="font-family:var(--font-display); font-weight:500; font-size:20px; letter-spacing:.12em;">KAIRALI</div>
+      <div class="logo-wm" style="font-family:var(--font-body); font-weight:700; font-size:18px; letter-spacing:-.03em;">coralsands</div>
+      <div class="logo-wm" style="font-family:var(--font-display); font-size:22px; letter-spacing:-.01em;">Amara&nbsp;Resorts</div>
+      <div class="logo-wm" style="font-family:var(--font-body); font-weight:600; font-size:17px; letter-spacing:.04em; text-transform:uppercase;">Lagoon Bay</div>
+      <div class="logo-wm" style="font-family:var(--font-display); font-style:italic; font-weight:500; font-size:20px;">Sahara&nbsp;Stays</div>
+    </div>
+  </div>
+</section>
+
+<!-- ──────────────── FEATURES ──────────────── -->
+<section class="s features-bg" id="features" data-screen-label="03 Features">
+  <div class="container">
+    <div class="s-head reveal">
+      <span class="eyebrow">The platform</span>
+      <h2 class="h-display">Every system your hotel needs, <em>in one place.</em></h2>
+      <p>BluePMS replaces a patchwork of legacy tools with a single, cloud-native operating system — purpose-built for hoteliers, not generic SaaS.</p>
+    </div>
+    <div class="feat-grid reveal d1">
+      <!-- 8 features -->
+      <div class="feat">
+        <div>
+          <div class="feat-ic">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 9h18M8 5V3M16 5V3"/></svg>
+          </div>
+          <span class="feat-num">01</span>
+        </div>
+        <div>
+          <h3>Front Office</h3>
+          <p>Check-in, check-out and reservations with a zero-training UI. Guest profiles, room assignments and folios in one pane.</p>
+        </div>
+      </div>
+      <div class="feat">
+        <div>
+          <div class="feat-ic">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 7h16M4 12h16M4 17h16"/><circle cx="8" cy="7" r="1.6" fill="currentColor"/><circle cx="15" cy="12" r="1.6" fill="currentColor"/><circle cx="11" cy="17" r="1.6" fill="currentColor"/></svg>
+          </div>
+          <span class="feat-num">02</span>
+        </div>
+        <div>
+          <h3>Channel Manager</h3>
+          <p>Sync rates, inventory and restrictions across 200+ OTAs in real time. No more double-bookings or manual rate pushes.</p>
+        </div>
+      </div>
+      <div class="feat">
+        <div>
+          <div class="feat-ic">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M8 15h2M13 15h3"/></svg>
+          </div>
+          <span class="feat-num">03</span>
+        </div>
+        <div>
+          <h3>POS &amp; Billing</h3>
+          <p>Restaurants, spa, minibar — every charge flows to the guest folio instantly. Tax-compliant invoicing, any currency.</p>
+        </div>
+      </div>
+      <div class="feat">
+        <div>
+          <div class="feat-ic">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 12l4-8h10l4 8v8H3z"/><path d="M7 12h10M12 4v16"/></svg>
+          </div>
+          <span class="feat-num">04</span>
+        </div>
+        <div>
+          <h3>Housekeeping</h3>
+          <p>Auto-assigned tasks, real-time status, mobile app for housekeepers. Turnarounds that finish before check-in, every time.</p>
+        </div>
+      </div>
+      <div class="feat">
+        <div>
+          <div class="feat-ic">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-7 8-7s8 3 8 7"/></svg>
+          </div>
+          <span class="feat-num">05</span>
+        </div>
+        <div>
+          <h3>Guest CRM</h3>
+          <p>Every stay, preference, and interaction — stitched together. Personalize outreach, run targeted campaigns, lift repeat rate.</p>
+        </div>
+      </div>
+      <div class="feat">
+        <div>
+          <div class="feat-ic">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 17l6-6 4 4 8-8"/><path d="M14 7h7v7"/></svg>
+          </div>
+          <span class="feat-num">06</span>
+        </div>
+        <div>
+          <h3>Revenue Reports</h3>
+          <p>Board-ready P&amp;L, ADR, RevPAR and pickup pacing. Drill from a KPI to a single reservation in two clicks.</p>
+        </div>
+      </div>
+      <div class="feat">
+        <div>
+          <div class="feat-ic">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 10a8 8 0 0 1 16 0v2a8 8 0 0 1-16 0z"/><path d="M12 6v6l3 2"/><path d="M8 2l2 2M16 2l-2 2"/></svg>
+          </div>
+          <span class="feat-num">07</span>
+        </div>
+        <div>
+          <h3>F&amp;B Costing</h3>
+          <p>Recipe management, real-time usage tracking and profitability analytics — every plate margin visible, every leak sealed.</p>
+        </div>
+      </div>
+      <div class="feat">
+        <div>
+          <div class="feat-ic">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 7l9-4 9 4v10l-9 4-9-4V7z"/><path d="M3 7l9 4 9-4M12 11v10"/></svg>
+          </div>
+          <span class="feat-num">08</span>
+        </div>
+        <div>
+          <h3>Purchase &amp; Inventory</h3>
+          <p>Automated procurement, live stock visibility and AI-driven demand insights — cut waste, negotiate smarter, never run dry.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="feat-more reveal d2">
+      <span class="eyebrow" style="color:var(--ink-5);">Also included</span>
+      <div class="feat-chips">
+        <span class="chip">Accounts Receivable</span>
+        <span class="chip">Payroll</span>
+        <span class="chip">Sales &amp; Marketing</span>
+        <span class="chip">WhatsApp Communications</span>
+        <span class="chip">Booking Engine</span>
+        <span class="chip">Multi-Property</span>
+        <span class="chip">Mobile Apps</span>
+        <span class="chip">200+ Reports</span>
+        <span class="chip">Open API</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ──────────────── WHY METRICS ──────────────── -->
+<section class="s why" id="why" data-screen-label="04 Why">
+  <div class="container">
+    <div class="s-head reveal">
+      <span class="eyebrow">Why BluePMS</span>
+      <h2 class="h-display">Measurable impact, <em>from day one.</em></h2>
+      <p>Averaged across properties that migrated to BluePMS in the last 12 months.</p>
+    </div>
+    <div class="metrics reveal d1">
+      <div class="metric">
+        <div class="big" data-count="48"><span class="v">0</span><span class="unit">hrs</span></div>
+        <h4>To go live</h4>
+        <p>From signed to serving guests — not weeks of implementation.</p>
+      </div>
+      <div class="metric">
+        <div class="big" data-count="200"><span class="v">0</span><span class="unit">+</span></div>
+        <h4>Reports, built-in</h4>
+        <p>Occupancy, ADR, RevPAR, F&amp;B margin, labor — ready on day one.</p>
+      </div>
+      <div class="metric">
+        <div class="big" data-count="60"><span class="v">0</span><span class="unit">%</span></div>
+        <h4>Less manual work</h4>
+        <p>AI takes over rate pushes, folio splits, and housekeeping routes.</p>
+      </div>
+      <div class="metric">
+        <div class="big" data-count="99.9" data-decimal="1"><span class="v">0</span><span class="unit">%</span></div>
+        <h4>Uptime SLA</h4>
+        <p>Zero-downtime releases across every region we operate in.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ──────────────── GLOBAL PRESENCE ──────────────── -->
+<section class="s" id="global" data-screen-label="05 Global">
+  <div class="container">
+    <div class="s-head reveal">
+      <span class="eyebrow">Global footprint</span>
+      <h2 class="h-display">One platform, <em>every market.</em></h2>
+      <p>Multi-currency, multi-tax, multi-language — BluePMS is localized for the rules, rails and languages that matter where you operate.</p>
+    </div>
+
+    <!-- Top bento: hero feature + stats column -->
+    <div class="markets-hero reveal d1">
+      <div class="market-feature">
+        <div class="mf-top">
+          <span class="mf-flag">🇮🇳</span>
+          <div class="mf-tag">Largest market</div>
+        </div>
+        <div class="mf-body">
+          <h3 class="mf-name">India</h3>
+          <div class="mf-sub">1,240+ properties · 18 states · 42 cities</div>
+        </div>
+        <div class="mf-chips">
+          <span class="mf-chip"><span class="dot-g"></span>GSTN &amp; e-invoicing</span>
+          <span class="mf-chip">₹ INR</span>
+          <span class="mf-chip">Hindi · Tamil · English</span>
+          <span class="mf-chip">UPI · RuPay · cards</span>
+        </div>
+      </div>
+
+      <div class="market-stats-col">
+        <div class="market-stat">
+          <div class="ms-v">14</div>
+          <div class="ms-l">Countries live</div>
+          <svg class="ms-ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 3 4 6 4 9s-1.5 6-4 9M12 3c-2.5 3-4 6-4 9s1.5 6 4 9"/></svg>
+        </div>
+        <div class="market-stat">
+          <div class="ms-v">2,400<span class="ms-plus">+</span></div>
+          <div class="ms-l">Properties</div>
+          <svg class="ms-ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 9h.01M15 9h.01M9 13h.01M15 13h.01M9 17h.01M15 17h.01"/></svg>
+        </div>
+        <div class="market-stat">
+          <div class="ms-v">160K</div>
+          <div class="ms-l">Rooms under management</div>
+          <svg class="ms-ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="8" width="18" height="11" rx="2"/><path d="M3 12h18M7 8V5h10v3"/></svg>
+        </div>
+        <div class="market-stat">
+          <div class="ms-v">24/7</div>
+          <div class="ms-l">Regional support</div>
+          <svg class="ms-ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M21 15a2 2 0 0 1-2 2h-7l-4 4v-4H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- Country cards grid -->
+    <div class="market-grid reveal d2">
+      <div class="market-card">
+        <div class="mc-head">
+          <span class="mc-flag">🇦🇪</span>
+          <span class="mc-count">380 props</span>
+        </div>
+        <h4>United Arab Emirates</h4>
+        <div class="mc-cities">Dubai · Abu Dhabi · Sharjah</div>
+        <div class="mc-feat">VAT · AED · ZATCA-ready</div>
+      </div>
+      <div class="market-card">
+        <div class="mc-head">
+          <span class="mc-flag">🇸🇦</span>
+          <span class="mc-count">210 props</span>
+        </div>
+        <h4>Saudi Arabia</h4>
+        <div class="mc-cities">Riyadh · Jeddah · Mecca</div>
+        <div class="mc-feat">ZATCA e-invoicing · SAR</div>
+      </div>
+      <div class="market-card">
+        <div class="mc-head">
+          <span class="mc-flag">🇶🇦</span>
+          <span class="mc-count">84 props</span>
+        </div>
+        <h4>Qatar</h4>
+        <div class="mc-cities">Doha · Al Wakrah</div>
+        <div class="mc-feat">QAR · Arabic · English</div>
+      </div>
+      <div class="market-card">
+        <div class="mc-head">
+          <span class="mc-flag">🇴🇲</span>
+          <span class="mc-count">62 props</span>
+        </div>
+        <h4>Oman</h4>
+        <div class="mc-cities">Muscat · Salalah</div>
+        <div class="mc-feat">OMR · VAT-ready</div>
+      </div>
+      <div class="market-card">
+        <div class="mc-head">
+          <span class="mc-flag">🇱🇰</span>
+          <span class="mc-count">190 props</span>
+        </div>
+        <h4>Sri Lanka</h4>
+        <div class="mc-cities">Colombo · Galle · Kandy</div>
+        <div class="mc-feat">LKR · Sinhala · Tamil</div>
+      </div>
+      <div class="market-card">
+        <div class="mc-head">
+          <span class="mc-flag">🇲🇻</span>
+          <span class="mc-count">120 props</span>
+        </div>
+        <h4>Maldives</h4>
+        <div class="mc-cities">Malé · resort islands</div>
+        <div class="mc-feat">USD · island-optimized</div>
+      </div>
+      <div class="market-card">
+        <div class="mc-head">
+          <span class="mc-flag">🇳🇵</span>
+          <span class="mc-count">74 props</span>
+        </div>
+        <h4>Nepal</h4>
+        <div class="mc-cities">Kathmandu · Pokhara</div>
+        <div class="mc-feat">NPR · Nepali · English</div>
+      </div>
+      <div class="market-card coming">
+        <div class="mc-head">
+          <span class="mc-flag">🌍</span>
+          <span class="mc-count mc-count-soon">2026</span>
+        </div>
+        <h4>Africa</h4>
+        <div class="mc-cities">Kenya · Nigeria · Egypt</div>
+        <div class="mc-feat">Coming next — early access open</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ──────────────── IMPLEMENTATION TIMELINE ──────────────── -->
+<section class="s timeline-bg" id="golive" data-screen-label="06 Go-live">
+  <div class="container">
+    <div class="s-head reveal">
+      <span class="eyebrow">Implementation</span>
+      <h2 class="h-display">From signed to serving guests in <em>48 hours.</em></h2>
+      <p>Legacy PMS migrations take months. Ours is measured in coffees.</p>
+    </div>
+
+    <div class="timeline reveal d1">
+      <div class="tl-step">
+        <div class="tl-marker">01</div>
+        <div class="tl-stamp">Hour 0</div>
+        <h4>Kickoff &amp; data import</h4>
+        <p>A named specialist imports your room types, rates, reservations and guest data. No clean-room migrations.</p>
+      </div>
+      <div class="tl-step">
+        <div class="tl-marker">02</div>
+        <div class="tl-stamp">Hour 8</div>
+        <h4>Channel &amp; payments wired</h4>
+        <p>OTAs, booking engine, payment gateway and local tax profiles connected and tested end-to-end.</p>
+      </div>
+      <div class="tl-step">
+        <div class="tl-marker">03</div>
+        <div class="tl-stamp">Hour 24</div>
+        <h4>Staff trained, live dry-run</h4>
+        <p>Front desk, housekeeping and F&amp;B run a full day on training mode. Zero disruption to operations.</p>
+      </div>
+      <div class="tl-step">
+        <div class="tl-marker">04</div>
+        <div class="tl-stamp">Hour 48</div>
+        <h4>Go live, full stack</h4>
+        <p>Switch the cutover at 00:00. Every module — front desk to F&amp;B costing — running on BluePMS.</p>
+      </div>
+      <div class="tl-line" aria-hidden="true"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ──────────────── PRODUCT PREVIEW ──────────────── -->
+<section class="s preview" id="preview" data-screen-label="07 Preview">
+  <div class="container">
+    <div class="s-head reveal">
+      <span class="eyebrow">Product preview</span>
+      <h2 class="h-display">A product tour, <em>not a slideshow.</em></h2>
+      <p>Click through real screens to see how the pieces fit together.</p>
+    </div>
+
+    <div class="tabs reveal d1" id="tabs">
+      <button class="tab active" data-tab="front">Front Office</button>
+      <button class="tab" data-tab="channel">Channel Manager</button>
+      <button class="tab" data-tab="revenue">Revenue</button>
+      <button class="tab" data-tab="crm">Guest CRM</button>
+    </div>
+
+    <div class="preview-frame reveal d2">
+      <div class="preview-chrome">
+        <span class="dots"><i></i><i></i><i></i></span>
+        <span class="path" id="pvPath">app.bluepms.com / front-office / arrivals</span>
+      </div>
+
+      <!-- Front Office -->
+      <div class="preview-panel active" id="panel-front">
+        <div class="pv-grid">
+          <div class="pv-list">
+            <div style="font-size:12px; color:var(--ink-5); padding:0 4px 4px;">Arrivals · today</div>
+            <div class="item sel">
+              <div>
+                <div class="ttl">Mrs. Keiko Tanaka</div>
+                <div class="sub">Suite 402 · 3 nts · VIP</div>
+              </div>
+              <span class="badge">ARR 14:00</span>
+            </div>
+            <div class="item">
+              <div>
+                <div class="ttl">Mr. &amp; Mrs. Okafor</div>
+                <div class="sub">Room 218 · 2 nts · Booking.com</div>
+              </div>
+              <span class="badge">ARR 15:30</span>
+            </div>
+            <div class="item">
+              <div>
+                <div class="ttl">Grupo Salazar (6)</div>
+                <div class="sub">Rooms 301-303 · corporate</div>
+              </div>
+              <span class="badge">ARR 16:00</span>
+            </div>
+            <div class="item">
+              <div>
+                <div class="ttl">Ms. Lila Chen</div>
+                <div class="sub">Ocean view · 5 nts · direct</div>
+              </div>
+              <span class="badge">ARR 17:15</span>
+            </div>
+            <div class="item">
+              <div>
+                <div class="ttl">Mr. Arjun Mehta</div>
+                <div class="sub">Deluxe 118 · 1 nt</div>
+              </div>
+              <span class="badge">ARR 18:40</span>
+            </div>
+          </div>
+          <div class="pv-detail">
+            <div style="display:flex; justify-content:space-between; align-items:start;">
+              <div>
+                <div style="font-family:var(--font-display); font-size:22px; letter-spacing:-.02em;">Mrs. Keiko Tanaka</div>
+                <div style="font-size:12px; color:var(--ink-5); margin-top:4px;">Platinum · 12th stay · preferred: high floor, still water, late breakfast</div>
+              </div>
+              <div style="display:flex; gap:6px;">
+                <button class="btn btn-outline" style="padding:6px 12px; font-size:12px;">Message</button>
+                <button class="btn btn-primary" style="padding:6px 12px; font-size:12px;">Check in →</button>
+              </div>
+            </div>
+            <div style="display:grid; grid-template-columns: repeat(4,1fr); gap:8px;">
+              <div style="padding:10px; background:var(--white); border:1px solid var(--line-2); border-radius:8px;"><div style="font-size:10px;color:var(--ink-5);letter-spacing:.08em;">NIGHTS</div><div style="font-family:var(--font-display);font-size:20px;">3</div></div>
+              <div style="padding:10px; background:var(--white); border:1px solid var(--line-2); border-radius:8px;"><div style="font-size:10px;color:var(--ink-5);letter-spacing:.08em;">GUESTS</div><div style="font-family:var(--font-display);font-size:20px;">2</div></div>
+              <div style="padding:10px; background:var(--white); border:1px solid var(--line-2); border-radius:8px;"><div style="font-size:10px;color:var(--ink-5);letter-spacing:.08em;">FOLIO</div><div style="font-family:var(--font-display);font-size:20px;">$1,284</div></div>
+              <div style="padding:10px; background:var(--white); border:1px solid var(--line-2); border-radius:8px;"><div style="font-size:10px;color:var(--ink-5);letter-spacing:.08em;">BALANCE</div><div style="font-family:var(--font-display);font-size:20px;">$0</div></div>
+            </div>
+            <div style="flex:1; min-height:160px;">
+              <div style="font-size:12px; color:var(--ink-5); margin-bottom:8px;">Room availability &middot; Apr 21 – May 04</div>
+              <div class="cal" id="cal"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Channel Manager -->
+      <div class="preview-panel" id="panel-channel">
+        <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:16px;">
+          <div>
+            <div style="font-family:var(--font-display); font-size:22px; letter-spacing:-.02em;">Connected channels</div>
+            <div style="font-size:12px; color:var(--ink-5); margin-top:4px;">12 live · last sync 38s ago · all rates in $</div>
+          </div>
+          <button class="btn btn-primary" style="padding:8px 14px; font-size:13px;">Push rates now</button>
+        </div>
+        <div class="ch-list">
+          <div class="ch-item">
+            <div style="display:flex; gap:12px; align-items:center;"><div style="width:30px;height:30px;border-radius:7px;background:linear-gradient(135deg,#0A3A7E,#0A6EDC);"></div><div><div style="font-weight:500;font-size:14px;">Booking.com</div><div style="font-size:11px;color:var(--ink-5)">OTA · 42% of mix</div></div></div>
+            <div><div class="ch-bar"><div class="ch-bar-fill" style="width:42%"></div></div></div>
+            <div class="ch-meta">$14,220</div>
+            <div><span class="pill-on">● LIVE</span></div>
+          </div>
+          <div class="ch-item">
+            <div style="display:flex; gap:12px; align-items:center;"><div style="width:30px;height:30px;border-radius:7px;background:linear-gradient(135deg,#B53A3A,#E35959);"></div><div><div style="font-weight:500;font-size:14px;">Expedia</div><div style="font-size:11px;color:var(--ink-5)">OTA · 18% of mix</div></div></div>
+            <div><div class="ch-bar"><div class="ch-bar-fill" style="width:18%"></div></div></div>
+            <div class="ch-meta">$6,090</div>
+            <div><span class="pill-on">● LIVE</span></div>
+          </div>
+          <div class="ch-item">
+            <div style="display:flex; gap:12px; align-items:center;"><div style="width:30px;height:30px;border-radius:7px;background:linear-gradient(135deg,#B82E4B,#E8487A);"></div><div><div style="font-weight:500;font-size:14px;">Airbnb</div><div style="font-size:11px;color:var(--ink-5)">OTA · 11% of mix</div></div></div>
+            <div><div class="ch-bar"><div class="ch-bar-fill" style="width:11%"></div></div></div>
+            <div class="ch-meta">$3,730</div>
+            <div><span class="pill-on">● LIVE</span></div>
+          </div>
+          <div class="ch-item">
+            <div style="display:flex; gap:12px; align-items:center;"><div style="width:30px;height:30px;border-radius:7px;background:linear-gradient(135deg,#195540,#2E8C6E);"></div><div><div style="font-weight:500;font-size:14px;">Agoda</div><div style="font-size:11px;color:var(--ink-5)">OTA · 7% of mix</div></div></div>
+            <div><div class="ch-bar"><div class="ch-bar-fill" style="width:7%"></div></div></div>
+            <div class="ch-meta">$2,410</div>
+            <div><span class="pill-on">● LIVE</span></div>
+          </div>
+          <div class="ch-item">
+            <div style="display:flex; gap:12px; align-items:center;"><div style="width:30px;height:30px;border-radius:7px;background:linear-gradient(135deg,var(--ink),var(--ink-3));"></div><div><div style="font-weight:500;font-size:14px;">Direct booking engine</div><div style="font-size:11px;color:var(--ink-5)">own site · 22% of mix</div></div></div>
+            <div><div class="ch-bar"><div class="ch-bar-fill" style="width:22%"></div></div></div>
+            <div class="ch-meta">$7,980</div>
+            <div><span class="pill-on">● LIVE</span></div>
+          </div>
+          <div class="ch-item">
+            <div style="display:flex; gap:12px; align-items:center;"><div style="width:30px;height:30px;border-radius:7px;background:linear-gradient(135deg,#5A5A5A,#8A8A8A);"></div><div><div style="font-weight:500;font-size:14px;">Google Hotel Ads</div><div style="font-size:11px;color:var(--ink-5)">metasearch · paused</div></div></div>
+            <div><div class="ch-bar"><div class="ch-bar-fill" style="width:0%"></div></div></div>
+            <div class="ch-meta">—</div>
+            <div><span class="pill-off">○ PAUSED</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Revenue -->
+      <div class="preview-panel" id="panel-revenue">
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
+          <div>
+            <div style="font-family:var(--font-display); font-size:22px; letter-spacing:-.02em; margin-bottom:4px;">Pickup pacing · May</div>
+            <div style="font-size:12px; color:var(--ink-5); margin-bottom:20px;">12% ahead of same-time-last-year</div>
+            <div class="rev-cards" style="margin-bottom:16px;">
+              <div class="rev-card"><div class="l">On the books</div><div class="v">$182K</div></div>
+              <div class="rev-card"><div class="l">Forecast</div><div class="v">$247K</div></div>
+              <div class="rev-card"><div class="l">vs STLY</div><div class="v" style="color:#0E7E52">+12%</div></div>
+            </div>
+            <div style="height:180px; background:var(--white); border:1px solid var(--line-2); border-radius:10px; padding:14px; position:relative;">
+              <svg viewBox="0 0 400 140" preserveAspectRatio="none" style="width:100%; height:100%; overflow:visible;">
+                <g stroke="#EEF2F8" stroke-width="1">
+                  <line x1="0" y1="35" x2="400" y2="35"/>
+                  <line x1="0" y1="70" x2="400" y2="70"/>
+                  <line x1="0" y1="105" x2="400" y2="105"/>
+                </g>
+                <path d="M0,110 L30,100 L60,95 L90,82 L120,78 L150,65 L180,58 L210,50 L240,44 L270,36 L300,28 L330,22 L360,16 L400,10" fill="none" stroke="#0E2A47" stroke-width="2"/>
+                <path d="M0,115 L30,108 L60,102 L90,95 L120,88 L150,80 L180,72 L210,65 L240,58 L270,52 L300,48 L330,42 L360,38 L400,34" fill="none" stroke="#6B83A3" stroke-width="1.5" stroke-dasharray="3 3"/>
+              </svg>
+              <div style="position:absolute; top:14px; right:14px; display:flex; gap:10px; font-size:10px; color:var(--ink-5);">
+                <span style="display:flex; align-items:center; gap:4px;"><i style="width:10px;height:2px;background:var(--ink);display:inline-block"></i> This year</span>
+                <span style="display:flex; align-items:center; gap:4px;"><i style="width:10px;height:2px;background:var(--ink-5);display:inline-block"></i> Last year</span>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div style="font-family:var(--font-display); font-size:22px; letter-spacing:-.02em; margin-bottom:4px;">AI recommendations</div>
+            <div style="font-size:12px; color:var(--ink-5); margin-bottom:16px;">3 rate actions pending your approval</div>
+            <div style="display:flex; flex-direction:column; gap:10px;">
+              <div style="background:var(--white); border:1px solid var(--line-2); border-radius:10px; padding:14px;">
+                <div style="display:flex; justify-content:space-between; align-items:start; margin-bottom:8px;">
+                  <div style="font-weight:500; font-size:13px;">Raise Suite rates · Fri-Sun</div>
+                  <span style="font-family:var(--font-mono); font-size:10px; padding:3px 8px; border-radius:4px; background:rgba(14,42,71,0.08); color:var(--ink-3);">HIGH CONFIDENCE</span>
+                </div>
+                <div style="font-size:12px; color:var(--ink-4); margin-bottom:12px;">Demand +38% vs forecast. Recommend $420 → $478 (+14%). Projected lift: $4,640.</div>
+                <div style="display:flex; gap:6px;"><button class="btn btn-primary" style="padding:5px 12px; font-size:12px;">Apply</button><button class="btn btn-ghost" style="padding:5px 12px; font-size:12px;">Dismiss</button></div>
+              </div>
+              <div style="background:var(--white); border:1px solid var(--line-2); border-radius:10px; padding:14px;">
+                <div style="display:flex; justify-content:space-between; align-items:start; margin-bottom:8px;">
+                  <div style="font-weight:500; font-size:13px;">Open Agoda · +8 rooms</div>
+                  <span style="font-family:var(--font-mono); font-size:10px; padding:3px 8px; border-radius:4px; background:var(--bg-3); color:var(--ink-4);">MEDIUM</span>
+                </div>
+                <div style="font-size:12px; color:var(--ink-4); margin-bottom:12px;">Compset closing fast. Freeing Agoda inventory captures $1,920 expected.</div>
+                <div style="display:flex; gap:6px;"><button class="btn btn-primary" style="padding:5px 12px; font-size:12px;">Apply</button><button class="btn btn-ghost" style="padding:5px 12px; font-size:12px;">Dismiss</button></div>
+              </div>
+              <div style="background:var(--white); border:1px solid var(--line-2); border-radius:10px; padding:14px;">
+                <div style="display:flex; justify-content:space-between; align-items:start; margin-bottom:8px;">
+                  <div style="font-weight:500; font-size:13px;">Close 2-night minimum · Mon</div>
+                  <span style="font-family:var(--font-mono); font-size:10px; padding:3px 8px; border-radius:4px; background:var(--bg-3); color:var(--ink-4);">LOW</span>
+                </div>
+                <div style="font-size:12px; color:var(--ink-4);">Low fill day — relax LOS to catch single-night corp demand.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CRM -->
+      <div class="preview-panel" id="panel-crm">
+        <div style="display:grid; grid-template-columns: 260px 1fr; gap:20px;">
+          <div>
+            <div style="font-family:var(--font-display); font-size:20px; letter-spacing:-.02em;">Guest 360° profile</div>
+            <div style="margin-top:20px; background:var(--white); border:1px solid var(--line-2); border-radius:10px; padding:16px; display:flex; flex-direction:column; align-items:center; text-align:center;">
+              <div style="width:64px; height:64px; border-radius:100px; background:linear-gradient(135deg,var(--ink-3),var(--ink-5)); margin-bottom:12px;"></div>
+              <div style="font-weight:600;">Keiko Tanaka</div>
+              <div style="font-size:11px; color:var(--ink-5); margin-bottom:12px;">Platinum · since 2019</div>
+              <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:8px; width:100%; font-size:11px;">
+                <div><div style="font-family:var(--font-display);font-size:18px;">12</div><div style="color:var(--ink-5)">stays</div></div>
+                <div><div style="font-family:var(--font-display);font-size:18px;">4.9</div><div style="color:var(--ink-5)">rating</div></div>
+                <div><div style="font-family:var(--font-display);font-size:18px;">$34K</div><div style="color:var(--ink-5)">LTV</div></div>
+              </div>
+            </div>
+            <div style="margin-top:12px; background:var(--white); border:1px solid var(--line-2); border-radius:10px; padding:16px;">
+              <div style="font-size:11px; color:var(--ink-5); text-transform:uppercase; letter-spacing:.08em; margin-bottom:8px;">Preferences</div>
+              <div style="display:flex; flex-wrap:wrap; gap:6px;">
+                <span style="font-size:11px; padding:4px 10px; border-radius:100px; background:var(--bg-3);">High floor</span>
+                <span style="font-size:11px; padding:4px 10px; border-radius:100px; background:var(--bg-3);">Still water</span>
+                <span style="font-size:11px; padding:4px 10px; border-radius:100px; background:var(--bg-3);">Late breakfast</span>
+                <span style="font-size:11px; padding:4px 10px; border-radius:100px; background:var(--bg-3);">No minibar</span>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:12px;">
+              <div style="font-family:var(--font-display); font-size:20px; letter-spacing:-.02em;">Stay &amp; touchpoint timeline</div>
+              <span style="font-size:12px; color:var(--ink-5);">across 12 stays</span>
+            </div>
+            <div style="position:relative; padding-left:24px;">
+              <div style="position:absolute; left:6px; top:6px; bottom:6px; width:2px; background:var(--line);"></div>
+              <div style="position:relative; margin-bottom:14px;">
+                <div style="position:absolute; left:-22px; top:4px; width:12px; height:12px; border-radius:100px; background:var(--ink); border:3px solid var(--bg);"></div>
+                <div style="background:var(--white); border:1px solid var(--line-2); border-radius:10px; padding:12px 14px;">
+                  <div style="font-size:11px; color:var(--ink-5); font-family:var(--font-mono);">TODAY · 14:00</div>
+                  <div style="font-weight:500; margin-top:2px; font-size:13px;">Arrival — Suite 402, 3 nts</div>
+                  <div style="font-size:12px; color:var(--ink-4); margin-top:2px;">Pre-stay email sent · survey sent last trip: 5/5</div>
+                </div>
+              </div>
+              <div style="position:relative; margin-bottom:14px;">
+                <div style="position:absolute; left:-22px; top:4px; width:12px; height:12px; border-radius:100px; background:var(--ink-4); border:3px solid var(--bg);"></div>
+                <div style="background:var(--white); border:1px solid var(--line-2); border-radius:10px; padding:12px 14px;">
+                  <div style="font-size:11px; color:var(--ink-5); font-family:var(--font-mono);">FEB 12 · 4 nts</div>
+                  <div style="font-weight:500; margin-top:2px; font-size:13px;">Stay — Ocean Suite 501, $1,720</div>
+                  <div style="font-size:12px; color:var(--ink-4); margin-top:2px;">Spa booked · room service 3× · positive review on TripAdvisor</div>
+                </div>
+              </div>
+              <div style="position:relative; margin-bottom:14px;">
+                <div style="position:absolute; left:-22px; top:4px; width:12px; height:12px; border-radius:100px; background:var(--ink-5); border:3px solid var(--bg);"></div>
+                <div style="background:var(--white); border:1px solid var(--line-2); border-radius:10px; padding:12px 14px;">
+                  <div style="font-size:11px; color:var(--ink-5); font-family:var(--font-mono);">NOV 04 · 2 nts</div>
+                  <div style="font-weight:500; margin-top:2px; font-size:13px;">Stay — Deluxe 218, $640</div>
+                </div>
+              </div>
+              <div style="position:relative;">
+                <div style="position:absolute; left:-22px; top:4px; width:12px; height:12px; border-radius:100px; background:var(--ink-6); border:3px solid var(--bg);"></div>
+                <div style="background:var(--white); border:1px solid var(--line-2); border-radius:10px; padding:12px 14px;">
+                  <div style="font-size:11px; color:var(--ink-5); font-family:var(--font-mono);">SEP 22</div>
+                  <div style="font-weight:500; margin-top:2px; font-size:13px;">Marketing — Autumn campaign · opened, clicked, booked</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ──────────────── TESTIMONIALS ──────────────── -->
+<section class="s" id="testimonials" data-screen-label="08 Testimonials">
+  <div class="container">
+    <div class="s-head reveal">
+      <span class="eyebrow">Customers</span>
+      <h2 class="h-display">Trusted from <em>12 rooms to 1,200.</em></h2>
+      <p>Independents, boutique groups, and chains across India, the Gulf and South Asia.</p>
+    </div>
+    <div class="quotes reveal d1">
+      <div class="quote lg">
+        <div class="q-stars" aria-label="5 out of 5 stars">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="#FFD479"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/></svg>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="#FFD479"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/></svg>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="#FFD479"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/></svg>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="#FFD479"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/></svg>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="#FFD479"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/></svg>
+        </div>
+        <p class="q-text">"We replaced four legacy systems with BluePMS on a Wednesday. By Friday the front desk was faster, channels were cleaner, and my GMs had stopped emailing me spreadsheets."</p>
+        <div class="q-person">
+          <div class="q-ava" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          </div>
+          <div class="q-name"><b>Aarav Sharma</b> COO · Taveer Hospitality Group (34 properties · India &amp; UAE)</div>
+        </div>
+      </div>
+      <div class="quote">
+        <div class="q-stars">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="#E8A54A"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/></svg>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="#E8A54A"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/></svg>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="#E8A54A"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/></svg>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="#E8A54A"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/></svg>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="#E8A54A"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/></svg>
+        </div>
+        <p class="q-text">"The revenue AI paid for the platform in the first month. It flagged demand we'd have missed and added 12% to RevPAR by quarter end."</p>
+        <div class="q-person">
+          <div class="q-ava" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          </div>
+          <div class="q-name"><b>Priya Menon</b> Revenue Director · Kairali Resorts (Kerala)</div>
+        </div>
+      </div>
+      <div class="quote">
+        <div class="q-stars">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="#E8A54A"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/></svg>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="#E8A54A"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/></svg>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="#E8A54A"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/></svg>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="#E8A54A"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/></svg>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="#E8A54A"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/></svg>
+        </div>
+        <p class="q-text">"Housekeeping used to end at 4pm. Now we're turning rooms by 1. That's real money on high-occupancy weekends."</p>
+        <div class="q-person">
+          <div class="q-ava" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          </div>
+          <div class="q-name"><b>Omar Al-Rashid</b> GM · Coral Sands Dubai</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ──────────────── COMPARISON ──────────────── -->
+<section class="s compare-bg" id="compare" data-screen-label="09 Compare">
+  <div class="container">
+    <div class="s-head reveal">
+      <span class="eyebrow">Comparison</span>
+      <h2 class="h-display">BluePMS vs <em>the legacy PMS.</em></h2>
+      <p>What you get when you leave the 2005-era stack behind.</p>
+    </div>
+
+    <div class="compare-switch reveal d1">
+      <div class="sw" id="cmpSwitch">
+        <button class="on" data-view="features">Feature depth</button>
+        <button data-view="experience">Experience</button>
+        <button data-view="economics">Economics</button>
+      </div>
+    </div>
+
+    <div class="compare-table reveal d2" id="cmpTable">
+      <!-- filled by JS -->
+    </div>
+  </div>
+</section>
+
+<!-- ──────────────── CTA BANNER ──────────────── -->
+<section class="s" data-screen-label="10 CTA">
+  <div class="container">
+    <div class="cta-banner reveal">
+      <h2>Ready to go live <em style="font-style:italic; color:rgba(255,255,255,0.65);">in 48 hours?</em></h2>
+      <p>A 30-minute onboarding session on your real data — no slides, just the software running your property.</p>
+      <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
+        <button class="btn btn-primary btn-lg" onclick="openModal()">Go LIVE NOW! <span class="arrow">→</span></button>
+        <button class="btn btn-outline btn-lg" onclick="document.getElementById('features').scrollIntoView({behavior:'smooth'})">Explore Features</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ──────────────── FOOTER ──────────────── -->
+<footer data-screen-label="11 Footer">
+  <div class="container">
+    <div class="foot-grid">
+      <div class="foot-brand">
+        <a href="#" class="logo"><span class="logo-mark" aria-hidden="true">
+          <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
+            <path d="M22 12c-5.5 0-10 4-10.6 9.4C7.6 22.4 5 25.9 5 30c0 4.9 3.9 9 8.9 9H30c1.1 0 2-.9 2-2V24.5c0-.9-.7-1.5-1.5-1.5H25c-.3-6-5.2-11-11-11z"/>
+            <rect x="26" y="26" width="32" height="22" rx="2.5"/>
+            <rect x="50" y="30" width="2.5" height="3" rx="1" fill="#fff"/>
+            <rect x="50" y="36" width="2.5" height="6" rx="1" fill="#fff"/>
+            <path d="M36 48h12l2 5H34z"/>
+            <rect x="32" y="52" width="20" height="2.5" rx="1"/>
+          </svg>
+        </span><span>BluePMS</span></a>
+        <p>The modern operating system for hotels. Front desk to forecasting, unified.</p>
+        <div class="foot-socials">
+          <a href="#"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M22 5.8a8.5 8.5 0 0 1-2.4.7 4.2 4.2 0 0 0 1.8-2.3 8.4 8.4 0 0 1-2.6 1A4.1 4.1 0 0 0 12 9a11.7 11.7 0 0 1-8.5-4.3A4.1 4.1 0 0 0 4.8 10 4 4 0 0 1 3 9.6V9.7a4.1 4.1 0 0 0 3.3 4 4.2 4.2 0 0 1-1.8.1 4.1 4.1 0 0 0 3.8 2.9A8.3 8.3 0 0 1 2 18.5a11.6 11.6 0 0 0 6.3 1.8c7.6 0 11.8-6.3 11.8-11.8v-.5A8.4 8.4 0 0 0 22 5.8z"/></svg></a>
+          <a href="#"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zM8.3 18.3H5.7V10h2.6v8.3zM7 8.8a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm11.3 9.5h-2.6v-4c0-1 0-2.3-1.4-2.3S13 13 13 14.3v4h-2.6V10H13v1.2h.1a2.8 2.8 0 0 1 2.5-1.4c2.6 0 3.1 1.7 3.1 4v4.5z"/></svg></a>
+          <a href="#"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm5.9 14.7l-1.3.8c-1.2-.6-2.6-1-4.3-1a15.7 15.7 0 0 0-4.4.5l-.4-1c1.5-.4 3.1-.6 4.8-.6 1.7 0 3.3.3 4.7.8l.9.5zm1-3l-1.2.7a14 14 0 0 0-4.7-1 19 19 0 0 0-5.6.8l-.5-1a21 21 0 0 1 6.1-.8 16 16 0 0 1 5.3 1.1l.6.2zm.1-3.2A18 18 0 0 0 13 9.4c-2.3 0-4.5.3-6.6.9l-.6-1.1c2.2-.7 4.7-1 7.2-1 2.5 0 4.7.3 6.7 1l-.7 1.1z"/></svg></a>
+        </div>
+      </div>
+      <div class="foot-col">
+        <h5>Platform</h5>
+        <ul>
+          <li><a href="#">Front Office</a></li>
+          <li><a href="#">Channel Manager</a></li>
+          <li><a href="#">POS &amp; Billing</a></li>
+          <li><a href="#">Housekeeping</a></li>
+          <li><a href="#">Guest CRM</a></li>
+          <li><a href="#">Revenue AI</a></li>
+        </ul>
+      </div>
+      <div class="foot-col">
+        <h5>Solutions</h5>
+        <ul>
+          <li><a href="#">Boutique hotels</a></li>
+          <li><a href="#">Resorts</a></li>
+          <li><a href="#">Chains &amp; groups</a></li>
+          <li><a href="#">Serviced apartments</a></li>
+          <li><a href="#">Hostels</a></li>
+        </ul>
+      </div>
+      <div class="foot-col">
+        <h5>Resources</h5>
+        <ul>
+          <li><a href="#">Customer stories</a></li>
+          <li><a href="#">Changelog</a></li>
+          <li><a href="#">API docs</a></li>
+          <li><a href="#">Integrations</a></li>
+          <li><a href="#">Security</a></li>
+        </ul>
+      </div>
+      <div class="foot-col">
+        <h5>Company</h5>
+        <ul>
+          <li><a href="#">About</a></li>
+          <li><a href="#">Careers</a></li>
+          <li><a href="#">Press</a></li>
+          <li><a href="#">Contact</a></li>
+          <li><a href="#">Partners</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <div>© 2026 BluePMS Technologies. All rights reserved.</div>
+      <div class="legal">
+        <a href="#">Privacy</a>
+        <a href="#">Terms</a>
+        <a href="#">Security</a>
+        <a href="#">Status · <span style="color:#0E7E52">●</span> all systems operational</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- ──────────────── DEMO MODAL ──────────────── -->
+<div class="modal-wrap" id="modal" role="dialog" aria-modal="true">
+  <div class="modal-bg" onclick="closeModal()"></div>
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()" aria-label="Close">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    </button>
+    <div class="modal-side">
+      <h3>Let's get you live on <em>BluePMS.</em></h3>
+      <p>A 30-minute onboarding session with a specialist who's taken 2,400+ hotels live. No script.</p>
+      <ul>
+        <li><span class="cmark"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></span> Walk-through of every module on your data</li>
+        <li><span class="cmark"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></span> Migration plan tailored to your stack</li>
+        <li><span class="cmark"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></span> 48-hour go-live, zero downtime</li>
+      </ul>
+    </div>
+    <form class="modal-form" id="demoForm" onsubmit="submitDemo(event)">
+      <h4>Start going live</h4>
+      <div class="two">
+        <div class="field"><label>First name</label><input required placeholder="Priya"></div>
+        <div class="field"><label>Last name</label><input required placeholder="Menon"></div>
+      </div>
+      <div class="field"><label>Work email</label><input type="email" required placeholder="priya@kairali-resorts.com"></div>
+      <div class="field"><label>Hotel / group name</label><input required placeholder="Kairali Resorts"></div>
+      <div class="two">
+        <div class="field">
+          <label>Room count</label>
+          <select>
+            <option>Under 25</option>
+            <option>25–75</option>
+            <option selected>75–200</option>
+            <option>200–500</option>
+            <option>500+</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Properties</label>
+          <select>
+            <option>1</option>
+            <option selected>2–5</option>
+            <option>6–20</option>
+            <option>20+</option>
+          </select>
+        </div>
+      </div>
+      <button type="submit" class="btn btn-primary btn-lg">Go LIVE NOW! <span class="arrow">→</span></button>
+    </form>
+    <div class="modal-success" id="modalSuccess">
+      <div class="ok"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg></div>
+      <div style="font-family:var(--font-display); font-size:24px; letter-spacing:-.02em; margin-bottom:8px;">You're set to go live.</div>
+      <div style="color:var(--ink-4); font-size:14px; max-width:300px; margin:0 auto;">Our team will reach out within 4 business hours to schedule your onboarding.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ──────────────── TWEAKS ──────────────── -->
+<div class="tweaks" id="tweaksPanel">
+  <h5>Tweaks <button onclick="document.getElementById('tweaksPanel').classList.remove('show')" style="font-size:16px; color:var(--ink-5)">×</button></h5>
+  <div class="tweak">
+    <label>Blue shade</label>
+    <div class="swatches" id="swBlue">
+      <div class="swatch" data-v="#0E2A47" style="background:#0E2A47"></div>
+      <div class="swatch" data-v="#0A2540" style="background:#0A2540"></div>
+      <div class="swatch" data-v="#0B3B6F" style="background:#0B3B6F"></div>
+      <div class="swatch" data-v="#1E3A8A" style="background:#1E3A8A"></div>
+      <div class="swatch" data-v="#1D4ED8" style="background:#1D4ED8"></div>
+    </div>
+  </div>
+  <div class="tweak">
+    <label>Heading font</label>
+    <div class="tweak-seg" id="swFont">
+      <button data-v="serif">Serif</button>
+      <button data-v="sans">Sans</button>
+    </div>
+  </div>
+  <div class="tweak">
+    <label>Density</label>
+    <div class="tweak-seg" id="swDensity">
+      <button data-v="airy">Airy</button>
+      <button data-v="compact">Compact</button>
+    </div>
+  </div>
+  <div class="tweak">
+    <label>Theme</label>
+    <div class="tweak-seg" id="swDark">
+      <button data-v="false">Light</button>
+      <button data-v="true">Dark</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ─── Room grid fill ─── */
+(function(){
+  const g = document.getElementById('roomGrid');
+  if (!g) return;
+  const pattern = ['occ','occ','clean','occ','occ','dirty','occ','clean','occ','clean','occ','occ','occ','dirty','clean','occ','occ','occ','clean','occ','dirty','occ','occ','clean','occ','occ','occ','clean','occ','occ','occ','clean'];
+  pattern.forEach(c => { const d = document.createElement('div'); d.className = 'room ' + c; g.appendChild(d); });
+})();
+
+/* ─── Calendar fill for preview ─── */
+(function(){
+  const cal = document.getElementById('cal');
+  if (!cal) return;
+  const rooms = ['Suite 402','Suite 501','Room 218','Room 219','Room 301'];
+  // headers
+  cal.appendChild(Object.assign(document.createElement('div'),{className:'hdr', textContent:''}));
+  for (let i=0;i<14;i++){ const d = 21+i; const s = d>30?(d-30):d; cal.appendChild(Object.assign(document.createElement('div'),{className:'hdr', textContent: s})); }
+  // rows
+  const reservations = [
+    [0, 0, 3, 'a2', 'Tanaka'],
+    [1, 4, 6, 'a1', 'Okafor'],
+    [2, 1, 4, 'a1', 'Grupo Salazar'],
+    [3, 5, 9, 'a2', 'Chen (pending)', true],
+    [4, 2, 3, 'a3', 'Mehta'],
+    [4, 8, 12, 'a1', 'Sørensen'],
+  ];
+  rooms.forEach((r, idx) => {
+    cal.appendChild(Object.assign(document.createElement('div'),{className:'room-lbl', textContent: r}));
+    for (let i=0;i<14;i++){
+      const cell = document.createElement('div');
+      cell.className = 'cell';
+      cal.appendChild(cell);
+    }
+  });
+  reservations.forEach(([row, start, end, cls, name, pending]) => {
+    const width = end - start;
+    const rowStart = (row + 1) * 15 + 1 + start; // 1 header row + row*cols
+    // find matching cell
+    const cells = cal.querySelectorAll('.cell');
+    const cellIndex = row * 14 + start;
+    const cell = cells[cellIndex];
+    if (!cell) return;
+    const res = document.createElement('div');
+    res.className = 'res ' + cls + (pending ? ' pending' : '');
+    res.textContent = name;
+    res.style.left = '0';
+    res.style.width = `calc(${width * 100}% + ${width - 1}px)`;
+    cell.style.overflow = 'visible';
+    cell.style.zIndex = '1';
+    cell.appendChild(res);
+  });
+})();
+
+/* ─── Nav scroll state + progress bar ─── */
+(function(){
+  const nav = document.getElementById('nav');
+  const bar = document.getElementById('scrollProgress');
+  const onScroll = () => {
+    nav.classList.toggle('scrolled', window.scrollY > 40);
+    const max = document.documentElement.scrollHeight - window.innerHeight;
+    const p = max > 0 ? Math.min(1, window.scrollY / max) : 0;
+    if (bar) bar.style.transform = `scaleX(${p})`;
+  };
+  window.addEventListener('scroll', onScroll, {passive:true});
+  onScroll();
+})();
+
+/* ─── Scroll-spy: highlight the nav link for the section currently in view ─── */
+(function(){
+  const links = Array.from(document.querySelectorAll('.nav-links a[href^="#"]'));
+  if (!links.length) return;
+
+  // Map each nav link to its target section, skipping any whose target doesn't exist
+  const pairs = links
+    .map(link => ({ link, target: document.querySelector(link.getAttribute('href')) }))
+    .filter(p => p.target);
+
+  const visible = new Map(); // section -> intersectionRatio
+
+  const setActive = (el) => {
+    links.forEach(l => l.classList.remove('active'));
+    if (el) el.classList.add('active');
+  };
+
+  const pickActive = () => {
+    if (!visible.size) { setActive(null); return; }
+    let best = null, bestRatio = 0;
+    visible.forEach((ratio, section) => {
+      if (ratio > bestRatio) { bestRatio = ratio; best = section; }
+    });
+    if (!best) return;
+    const match = pairs.find(p => p.target === best);
+    if (match) setActive(match.link);
+  };
+
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) visible.set(e.target, e.intersectionRatio);
+      else visible.delete(e.target);
+    });
+    pickActive();
+  }, {
+    // Account for the sticky nav height — treat the viewport as starting below it
+    rootMargin: '-80px 0px -55% 0px',
+    threshold: [0, 0.2, 0.5, 0.8, 1]
+  });
+
+  pairs.forEach(p => io.observe(p.target));
+})();
+
+/* ─── Hero tilt settle ─── */
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    document.getElementById('stagePlate')?.classList.add('settled');
+  }, 200);
+});
+
+/* ─── Go-live timeline: trigger sequential cascade on scroll ─── */
+(function(){
+  const tl = document.querySelector('.timeline');
+  if (!tl) return;
+  const line = tl.querySelector('.tl-line');
+
+  const setSweepWidth = () => {
+    if (!line) return;
+    tl.style.setProperty('--tl-sweep-w', (line.offsetWidth + 80) + 'px');
+  };
+  setSweepWidth();
+  window.addEventListener('resize', setSweepWidth, { passive: true });
+
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        setSweepWidth();
+        tl.classList.add('in');
+        io.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.35 });
+  io.observe(tl);
+})();
+
+/* ─── AI copilot typing ─── */
+(function(){
+  const el = document.getElementById('aiAnswer');
+  if (!el) return;
+  const text = "You're pacing +12% vs STLY. Fri-Sun suites show +38% demand — I can lift rates $420 → $478 for est. +$4,640. Approve?";
+  let i = 0; let started = false;
+  const type = () => {
+    if (i < text.length) {
+      el.innerHTML = text.slice(0, ++i) + '<span class="cursor"></span>';
+      setTimeout(type, 18 + Math.random() * 28);
+    } else {
+      el.innerHTML = text + ' <span style="display:inline-flex; gap:4px; margin-left:4px; vertical-align:middle;"><button style="font-size:10px; padding:3px 8px; border-radius:5px; background:var(--ink); color:#fff; border:none;">Approve</button><button style="font-size:10px; padding:3px 8px; border-radius:5px; background:var(--bg-3); color:var(--ink-4); border:none;">Dismiss</button></span>';
+    }
+  };
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting && !started) { started = true; setTimeout(type, 900); obs.disconnect(); } });
+  }, { threshold: 0.3 });
+  obs.observe(el);
+})();
+
+/* ─── Magnetic primary buttons ─── */
+(function(){
+  const strength = 8;
+  document.querySelectorAll('.btn-primary.btn-lg, .btn-outline.btn-lg').forEach(btn => {
+    btn.addEventListener('mousemove', (e) => {
+      const r = btn.getBoundingClientRect();
+      const x = (e.clientX - r.left - r.width/2) / r.width;
+      const y = (e.clientY - r.top - r.height/2) / r.height;
+      btn.style.transform = `translate(${x * strength}px, ${y * strength}px)`;
+    });
+    btn.addEventListener('mouseleave', () => { btn.style.transform = ''; });
+  });
+})();
+
+/* ─── Reveal on scroll ─── */
+(function(){
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+})();
+
+/* ─── Counter animation ─── */
+(function(){
+  const ease = t => 1 - Math.pow(1 - t, 3);
+  const animate = (el) => {
+    const target = parseFloat(el.dataset.count);
+    const decimal = parseInt(el.dataset.decimal || '0');
+    const vEl = el.querySelector('.v');
+    const dur = 1400; const start = performance.now();
+    const step = (now) => {
+      const p = Math.min(1, (now - start) / dur);
+      const val = target * ease(p);
+      vEl.textContent = decimal ? val.toFixed(decimal) : Math.round(val);
+      if (p < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  };
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) { animate(e.target); io.unobserve(e.target); } });
+  }, { threshold: 0.4 });
+  document.querySelectorAll('.metric .big').forEach(el => io.observe(el));
+})();
+
+/* ─── Tabs ─── */
+(function(){
+  const tabs = document.querySelectorAll('.tab');
+  const paths = {
+    front: 'app.bluepms.com / front-office / arrivals',
+    channel: 'app.bluepms.com / channels / distribution',
+    revenue: 'app.bluepms.com / revenue / pacing',
+    crm: 'app.bluepms.com / crm / guest-360'
+  };
+  tabs.forEach(t => t.addEventListener('click', () => {
+    tabs.forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+    const key = t.dataset.tab;
+    document.querySelectorAll('.preview-panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('panel-' + key).classList.add('active');
+    document.getElementById('pvPath').textContent = paths[key];
+  }));
+})();
+
+/* ─── Comparison switch ─── */
+(function(){
+  const views = {
+    features: [
+      ['Setup time', 'Weeks to months', 'Under 48 hours'],
+      ['AI revenue recommendations', 'Not available', 'Built-in, live'],
+      ['Direct booking engine', 'Third-party add-on', 'Native, conversion-tuned'],
+      ['Channel sync speed', '2–4 hours (manual)', 'Real-time (<2 min)'],
+      ['Multi-property rollup', 'Extra module', 'Standard on every plan'],
+      ['Mobile front desk', 'Browser only', 'Native iOS &amp; Android']
+    ],
+    experience: [
+      ['Onboarding', 'Week-long training', '2-hour guided setup'],
+      ['Front desk UX', '1990s data-entry', 'Modern, keyboard-first'],
+      ['Guest-facing screens', 'Bare-bones', 'Brandable, on-property'],
+      ['Team permissions', 'Rigid roles', 'Granular, per module'],
+      ['Staff mobile app', 'None or paid add-on', 'Included for every staff role'],
+      ['Release cadence', 'Once a year', 'Weekly improvements']
+    ],
+    economics: [
+      ['Pricing model', 'Per user + per module', 'Flat per room'],
+      ['Hidden implementation fees', 'Common', 'Never'],
+      ['Integration costs', '$10K–$50K per connector', 'Every major integration, free'],
+      ['Support', 'Paid tiers, business hours', '24/7 included'],
+      ['Contract length', 'Annual, auto-renew', 'Monthly, cancel anytime'],
+      ['Uptime guarantee', '97–99%', '99.9% SLA']
+    ]
+  };
+  const tbl = document.getElementById('cmpTable');
+  const sw = document.getElementById('cmpSwitch');
+  const render = (key) => {
+    const rows = views[key];
+    tbl.innerHTML = `
+      <div class="compare-row head">
+        <div>Category</div>
+        <div>Traditional PMS</div>
+        <div class="us">BluePMS</div>
+      </div>` + rows.map(r => `
+      <div class="compare-row">
+        <div class="cat">${r[0]}</div>
+        <div><span class="xmark"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M18 6L6 18M6 6l12 12"/></svg></span>${r[1]}</div>
+        <div class="cell-us"><span class="cmark"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></span>${r[2]}</div>
+      </div>`).join('');
+  };
+  render('features');
+  sw.querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+    sw.querySelectorAll('button').forEach(x => x.classList.remove('on'));
+    b.classList.add('on');
+    render(b.dataset.view);
+  }));
+})();
+
+/* ─── Modal ─── */
+function openModal(){
+  document.getElementById('modal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  document.getElementById('demoForm').style.display = '';
+  document.getElementById('modalSuccess').classList.remove('show');
+}
+function closeModal(){
+  document.getElementById('modal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+function submitDemo(e){
+  e.preventDefault();
+  document.getElementById('demoForm').style.display = 'none';
+  document.getElementById('modalSuccess').classList.add('show');
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+/* ─── Tweaks panel + edit mode protocol ─── */
+let tweakState = {...TWEAK_DEFAULTS};
+
+function applyTweaks(state) {
+  document.documentElement.style.setProperty('--ink', state.blueShade);
+  // derive ink-2 (slightly darker) and ink-3 (mid)
+  document.documentElement.setAttribute('data-heading', state.headingFont);
+  document.documentElement.setAttribute('data-density', state.density);
+  document.documentElement.setAttribute('data-dark', String(state.dark));
+
+  // update swatch UI
+  document.querySelectorAll('#swBlue .swatch').forEach(s => s.classList.toggle('on', s.dataset.v === state.blueShade));
+  document.querySelectorAll('#swFont button').forEach(s => s.classList.toggle('on', s.dataset.v === state.headingFont));
+  document.querySelectorAll('#swDensity button').forEach(s => s.classList.toggle('on', s.dataset.v === state.density));
+  document.querySelectorAll('#swDark button').forEach(s => s.classList.toggle('on', s.dataset.v === String(state.dark)));
+}
+
+function setTweak(key, val) {
+  tweakState[key] = val;
+  applyTweaks(tweakState);
+  window.parent.postMessage({type: '__edit_mode_set_keys', edits: {[key]: val}}, '*');
+}
+
+document.querySelectorAll('#swBlue .swatch').forEach(s => s.addEventListener('click', () => setTweak('blueShade', s.dataset.v)));
+document.querySelectorAll('#swFont button').forEach(b => b.addEventListener('click', () => setTweak('headingFont', b.dataset.v)));
+document.querySelectorAll('#swDensity button').forEach(b => b.addEventListener('click', () => setTweak('density', b.dataset.v)));
+document.querySelectorAll('#swDark button').forEach(b => b.addEventListener('click', () => setTweak('dark', b.dataset.v === 'true')));
+
+applyTweaks(tweakState);
+
+// Register listener BEFORE announcing availability
+window.addEventListener('message', (e) => {
+  const d = e.data || {};
+  if (d.type === '__activate_edit_mode') document.getElementById('tweaksPanel').classList.add('show');
+  if (d.type === '__deactivate_edit_mode') document.getElementById('tweaksPanel').classList.remove('show');
+});
+window.parent.postMessage({type:'__edit_mode_available'}, '*');
+</script>
+</body>
+</html>
